@@ -3,16 +3,21 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Main.tmx",
+    "activeFile": "experimental.tmx",
     "expandedProjectPaths": [
     ],
     "fileStates": {
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Ground.tsx": {
+        "Desert modified.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Ground.tsx": {
             "dynamicWrapping": false,
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Main.tmx": {
+        "Main.tmx": {
             "scale": 0.33,
             "selectedLayer": 0,
             "viewCenter": {
@@ -20,25 +25,37 @@
                 "y": 825.7575757575758
             }
         },
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/terrain_atlas.tsx": {
+        "experimental.tmx": {
+            "scale": 0.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 688,
+                "y": 351
+            }
+        },
+        "terrain_atlas.tsx": {
             "scaleInDock": 1,
             "scaleInEditor": 1
         }
     },
     "last.exportedFilePath": "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Game Maps",
-    "last.imagePath": "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Game Assets/Atlas",
+    "last.imagePath": "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Game Assets/deserttileset/png/Tile",
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
     "map.width": 96,
     "openFiles": [
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Main.tmx"
+        "Main.tmx",
+        "experimental.tmx",
+        "Desert modified.tsx"
     ],
     "project": "main_map.tiled-project",
     "recentFiles": [
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Main.tmx",
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Ground.tsx",
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/terrain_atlas.tsx"
+        "Main.tmx",
+        "Desert modified.tsx",
+        "experimental.tmx",
+        "Ground.tsx",
+        "terrain_atlas.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
-    "tileset.type": 0
+    "tileset.type": 1
 }
