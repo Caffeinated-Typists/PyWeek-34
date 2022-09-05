@@ -8,14 +8,20 @@ SCREEN_HEIGTH:int = 700
 SCREEN_TITLE:str = "PyWeek-34"
 
 #scaling constants
-CHARACTER_SCALING = 1
-TILE_SCALING = 0.5
+CHARACTER_SCALING:float = 1
+TILE_SCALING:float = 0.5
 
 #map constants
-LAYER_OPTIONS = {
+LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
     "Platform" : {"use_spatial_hash": True, "sprite_scaling": TILE_SCALING},
 }
 
+def validate()->bool:
+    """Checks if the code is run from the proper directory"""
+    if os.path.isdir("PyWeek-34"):
+        return True
+    else: 
+        return False
 
 class MainMenu(arcade.View):
 
@@ -43,31 +49,33 @@ class GameView(arcade.View):
         self.scene:arcade.Scene = None
         self.tile_map:arcade.tilemap.TileMap = None
 
-        
-
     def setup(self)->None:
         """Setup all the variables and maps here"""
-        map_file = "PyWeek-34/resources/Game Maps/main.json"
+        map_file:str = "PyWeek-34/resources/Game Maps/main.json"
         self.tile_map = arcade.load_tilemap(map_file, layer_options=LAYER_OPTIONS)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         if self.tile_map.background_color:
             arcade.set_background_color(self.tile_map.background_color)
-        
 
-    def on_show_view(self):
+    def on_show_view(self)->None:
         """Display window on function call"""
         self.setup()
         
-    
-    def on_draw(self):
+    def on_draw(self)->None:
+        """Instructions to generate the layout of the window"""
         self.clear()
         self.scene.draw()
 
 
 def main()->None:
     """Main function for calling setup functions and running module"""
+
+    if not validate():
+        raise Exception("Run the script in the correct directory")
+
     window:arcade.Window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGTH, SCREEN_TITLE)
+    window.center_window = True
     menu_view:MainMenu = MainMenu()
     window.show_view(menu_view)
     arcade.run()
