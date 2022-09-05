@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "pyweek-34"
+version = "1.0.0"
+description = "Official entry for PyWeek - 34"
+authors = ["Aakarsh Jain <jainaakarsh09@gmail.com>", "Anirudh S Kumar <anirudh.skumar.03@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+arcade = "^2.6.15"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
