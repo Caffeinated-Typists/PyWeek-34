@@ -26,11 +26,11 @@
             }
         },
         "experimental.tmx": {
-            "scale": 0.5,
-            "selectedLayer": 0,
+            "scale": 1.5,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 688,
-                "y": 351
+                "x": 417.99999999999994,
+                "y": 671.6666666666667
             }
         },
         "terrain_atlas.tsx": {
