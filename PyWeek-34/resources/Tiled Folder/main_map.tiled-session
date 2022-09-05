@@ -25,7 +25,9 @@
             "scaleInEditor": 1
         }
     },
+    "last.exportedFilePath": "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Game Maps",
     "last.imagePath": "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Game Assets/Atlas",
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
     "map.width": 96,
     "openFiles": [
@@ -35,8 +37,8 @@
     ],
     "project": "main_map.tiled-project",
     "recentFiles": [
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/terrain_atlas.tsx",
         "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Ground.tsx",
+        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/terrain_atlas.tsx",
         "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Main.tmx"
     ],
     "tileset.lastUsedFormat": "tsx",
