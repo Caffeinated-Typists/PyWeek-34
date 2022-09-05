@@ -13,11 +13,11 @@
             "scaleInEditor": 1
         },
         "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Main.tmx": {
-            "scale": 0.5,
-            "selectedLayer": 1,
+            "scale": 0.33,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": -334,
-                "y": 967
+                "x": 1148.4848484848483,
+                "y": 825.7575757575758
             }
         },
         "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/terrain_atlas.tsx": {
@@ -31,15 +31,13 @@
     "map.lastUsedFormat": "tmx",
     "map.width": 96,
     "openFiles": [
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Main.tmx",
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Ground.tsx",
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/terrain_atlas.tsx"
+        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Main.tmx"
     ],
     "project": "main_map.tiled-project",
     "recentFiles": [
+        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Main.tmx",
         "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Ground.tsx",
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/terrain_atlas.tsx",
-        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/Main.tmx"
+        "C:/Users/aniru/Desktop/Python Projects/Pyweek/PyWeek-34/resources/Tiled Folder/terrain_atlas.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.type": 0
