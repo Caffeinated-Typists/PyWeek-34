@@ -1,6 +1,7 @@
 import typing
 import arcade
 import os
+os.chdir(os.getcwd() + r'\PyWeek-34')   #Changing current directory temporarily for importing rewuired character classes
 from characters.protagonist import Protagonist
 
 #screen constants
@@ -24,6 +25,8 @@ LAYER_PROTAGONIST = "Protagonist"
 def validate()->bool:
     """Checks if the code is run from the proper directory"""
     if os.path.isdir("PyWeek-34"):
+        file_path = os.path.dirname(os.path.abspath(__file__))
+        os.chdir(file_path)
         return True
     else: 
         return False
