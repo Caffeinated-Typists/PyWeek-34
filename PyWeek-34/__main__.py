@@ -9,12 +9,15 @@ SCREEN_WIDTH:int = 1000
 SCREEN_HEIGTH:int = 480
 SCREEN_TITLE:str = "PyWeek-34"
 
+
+
 #scaling constants
 CHARACTER_SCALING:float = 1
 TILE_SCALING:float = 0.5
 
 #Physics Constants
 GRAVITY:float = 1
+GAME_SPEED:int = 1
 
 # Tile Constants
 # 1. Platform
@@ -23,19 +26,31 @@ PLATFORM_HEIGHT:int = int(128 * TILE_SCALING)
 PLATFORM_CENTER_X:int = PLATFORM_WIDTH // 2
 PLATFORM_CENTER_Y:int = PLATFORM_HEIGHT // 2
 
-# Tile resources
+#protagonist_position
+CHARACTER_LEFT:int = 100
+CHARACTER_BOTTOM:int = PLATFORM_HEIGHT 
+
+# Game resources
 # platforms
 CORNER_PIECE_LEFT:str = r"resources/Game Assets/deserttileset/png/Tile/1.png"
 MIDDLE_PIECE:str = r"resources/Game Assets/deserttileset/png/Tile/2.png"  
 CORNER_PIECE_RIGHT:str = r"resources/Game Assets/deserttileset/png/Tile/3.png"
 
+#background
+BACKGROUND:str = r"resources/Game Assets/deserttileset/png/BG.png"
 
 
 #map constants
+
+LAYER_PLATFORM:str = "Platform"
+LAYER_PROTAGONIST:str = "Protagonist"
+
 LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
-    "Platform" : {"use_spatial_hash": True, "sprite_scaling": TILE_SCALING},
+    LAYER_PLATFORM : {
+        "use_spatial_hash": False, 
+        "sprite_scaling": TILE_SCALING},
 }
-LAYER_PROTAGONIST = "Protagonist"
+
 
 def validate()->bool:
     """Checks if the code is run from the proper directory"""
@@ -70,11 +85,9 @@ class GameView(arcade.View):
 
         arcade.set_background_color(arcade.color.RED_BROWN)
 
-
-
-
         self.scene:arcade.Scene = None
         self.tile_map:arcade.tilemap.TileMap = None
+        self.background:arcade.Texture = None
 
         self.left_pressed:bool = False
         self.right_pressed:bool = False
@@ -87,6 +100,7 @@ class GameView(arcade.View):
     def setup(self)->None:
         """Setup all the variables and maps here"""
         # map_file:str = "PyWeek-34/resources/Game Maps/main.json"
+        self.background = arcade.load_texture(BACKGROUND)
 
         self.scene = arcade.Scene()
         self.scene.add_sprite_list("Platform")
@@ -95,8 +109,8 @@ class GameView(arcade.View):
         arcade.set_background_color(arcade.color.RED_DEVIL)
 
         self.protagonist = Protagonist()
-        self.protagonist.set_pos_x(500)
-        self.protagonist.set_pos_y(350)
+        self.protagonist.set_pos_x(CHARACTER_BOTTOM + self.protagonist.width // 2)
+        self.protagonist.set_pos_y(CHARACTER_LEFT + self.protagonist.height // 2)
         self.scene.add_sprite(LAYER_PROTAGONIST, self.protagonist)
 
 
@@ -114,7 +128,7 @@ class GameView(arcade.View):
             self.scene.add_sprite("Platform", middle_sprite)                        
 
 
-        self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, walls = self.scene["Platform"]) 
+        self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, platforms=self.scene["Platform"]) 
 
 
 
@@ -125,13 +139,15 @@ class GameView(arcade.View):
     def on_draw(self)->None:
         """Instructions to generate the layout of the window"""
         self.clear()
+        arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGTH, self.background)
         self.scene.draw()
 
     def on_update(self, delta_time: float):
         """Specify the computations at each refresh"""
         self.physics_engine.update()
-
         self.process_key_change()
+        for i in self.scene[LAYER_PLATFORM]:
+            i.change_x=-GAME_SPEED
 
     def process_key_change(self) -> None:
         """Called after any recorded change in key to update the local variables appropriately"""
