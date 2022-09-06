@@ -13,12 +13,13 @@ CHARACTER_SCALING:float = 1
 TILE_SCALING:float = 0.5
 
 #Physics Constants
-GRAVITY:int = 5
+GRAVITY:float = 1
 
 #map constants
 LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
     "Platform" : {"use_spatial_hash": True, "sprite_scaling": TILE_SCALING},
 }
+LAYER_PROTAGONIST = "Protagonist"
 
 def validate()->bool:
     """Checks if the code is run from the proper directory"""
@@ -72,8 +73,11 @@ class GameView(arcade.View):
             arcade.set_background_color(self.tile_map.background_color)
 
         self.protagonist = Protagonist()
+        self.protagonist.set_pos_x(500)
+        self.protagonist.set_pos_y(350)
+        self.scene.add_sprite(LAYER_PROTAGONIST, self.protagonist)
 
-        self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, walls = self.scene["Platforms"]) 
+        self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, walls = self.scene["Platform"]) 
 
     def on_show_view(self)->None:
         """Display window on function call"""
@@ -88,6 +92,8 @@ class GameView(arcade.View):
         """Specify the computations at each refresh"""
         self.physics_engine.update()
 
+        self.process_key_change()
+
     def process_key_change(self) -> None:
         """Called after any recorded change in key to update the local variables appropriately"""
 
@@ -95,6 +101,11 @@ class GameView(arcade.View):
             self.protagonist.go_left()
         elif self.right_pressed and not self.left_pressed:
             self.protagonist.go_right()
+        else:
+            self.protagonist.stationary_x()
+
+        if self.up_pressed and self.physics_engine.can_jump():
+            self.protagonist.jump()
 
     def on_key_press(self, key: int, modifiers: int)->None:
         """Function to process the key presses of the user"""

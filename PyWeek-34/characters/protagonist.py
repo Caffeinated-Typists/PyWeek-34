@@ -44,6 +44,10 @@ class Protagonist(arcade.Sprite):
         """Update the y velocity of the player"""
         self.change_y += y
 
+    def stationary_x(self) -> None:
+        """Set x-velocity to 0"""
+        self.change_x = 0
+
     def go_left(self) -> None:
         """Update the speed in x direction to go left"""
         self.set_vel_x(-self.horizontal_vel)
@@ -52,4 +56,6 @@ class Protagonist(arcade.Sprite):
         """Update the speed in x direction to go right"""
         self.set_vel_x(self.horizontal_vel)
 
-    
+    def jump(self) -> None:
+        """Update the y-velocity for jumping"""
+        self.update_vel_y(self.jump_vel)
