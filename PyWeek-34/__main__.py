@@ -6,7 +6,7 @@ from characters.protagonist import Protagonist
 
 #screen constants
 SCREEN_WIDTH:int = 1000
-SCREEN_HEIGTH:int = 700
+SCREEN_HEIGTH:int = 480
 SCREEN_TITLE:str = "PyWeek-34"
 
 #scaling constants
@@ -15,6 +15,21 @@ TILE_SCALING:float = 0.5
 
 #Physics Constants
 GRAVITY:float = 1
+
+# Tile Constants
+# 1. Platform
+PLATFORM_WIDTH:int = int(128 * TILE_SCALING)
+PLATFORM_HEIGHT:int = int(128 * TILE_SCALING)
+PLATFORM_CENTER_X:int = PLATFORM_WIDTH // 2
+PLATFORM_CENTER_Y:int = PLATFORM_HEIGHT // 2
+
+# Tile resources
+# platforms
+CORNER_PIECE_LEFT:str = r"resources/Game Assets/deserttileset/png/Tile/1.png"
+MIDDLE_PIECE:str = r"resources/Game Assets/deserttileset/png/Tile/2.png"  
+CORNER_PIECE_RIGHT:str = r"resources/Game Assets/deserttileset/png/Tile/3.png"
+
+
 
 #map constants
 LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
@@ -54,6 +69,10 @@ class GameView(arcade.View):
         super().__init__()
 
         arcade.set_background_color(arcade.color.RED_BROWN)
+
+
+
+
         self.scene:arcade.Scene = None
         self.tile_map:arcade.tilemap.TileMap = None
 
@@ -68,19 +87,36 @@ class GameView(arcade.View):
     def setup(self)->None:
         """Setup all the variables and maps here"""
         # map_file:str = "PyWeek-34/resources/Game Maps/main.json"
-        map_file:str = "resources/Game Maps/main.json"
-        self.tile_map = arcade.load_tilemap(map_file, layer_options=LAYER_OPTIONS)
-        self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
-        if self.tile_map.background_color:
-            arcade.set_background_color(self.tile_map.background_color)
+        self.scene = arcade.Scene()
+        self.scene.add_sprite_list("Platform")
+        self.scene.add_sprite_list("Protagonist")
+
+        arcade.set_background_color(arcade.color.RED_DEVIL)
 
         self.protagonist = Protagonist()
         self.protagonist.set_pos_x(500)
         self.protagonist.set_pos_y(350)
         self.scene.add_sprite(LAYER_PROTAGONIST, self.protagonist)
 
+
+        #adding corner piece
+        corner_sprite_left:arcade.Sprite = arcade.Sprite(CORNER_PIECE_LEFT, TILE_SCALING)
+        corner_sprite_left.center_x = PLATFORM_CENTER_X
+        corner_sprite_left.center_y = PLATFORM_CENTER_Y
+        self.scene.add_sprite("Platform", corner_sprite_left)
+
+        #adding middle sprites
+        for i in range(PLATFORM_WIDTH + PLATFORM_CENTER_X, SCREEN_WIDTH, PLATFORM_WIDTH):
+            middle_sprite:arcade.Sprite = arcade.Sprite(MIDDLE_PIECE, TILE_SCALING)
+            middle_sprite.center_x = i  
+            middle_sprite.center_y = PLATFORM_CENTER_Y
+            self.scene.add_sprite("Platform", middle_sprite)                        
+
+
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, walls = self.scene["Platform"]) 
+
+
 
     def on_show_view(self)->None:
         """Display window on function call"""
