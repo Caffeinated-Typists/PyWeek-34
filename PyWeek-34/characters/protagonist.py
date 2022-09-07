@@ -2,7 +2,7 @@ import typing
 import arcade
 
 PROTAGONIST_SPEED:int = 10
-PROTAGONIST_JUMP_SPEED:int = 5
+PROTAGONIST_JUMP_SPEED:int = 20
 
 class Protagonist(arcade.Sprite):
 
@@ -18,7 +18,7 @@ class Protagonist(arcade.Sprite):
     
     def set_pos_left(self, x:int) -> None:
         """Set the left boundary of the player"""
-        self.left = x
+        self.left = x   
 
     def set_pos_y(self, y:int) -> None:
         """Set the y coordinate of the player"""

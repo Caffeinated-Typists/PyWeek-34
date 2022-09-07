@@ -17,7 +17,7 @@ TILE_SCALING:float = 0.5
 
 #Physics Constants
 GRAVITY:float = 1
-GAME_SPEED:int = 1
+GAME_SPEED:int = 5
 
 # Tile Constants
 # 1. Platform
@@ -103,8 +103,8 @@ class GameView(arcade.View):
         self.background = arcade.load_texture(BACKGROUND)
 
         self.scene = arcade.Scene()
-        self.scene.add_sprite_list("Platform")
-        self.scene.add_sprite_list("Protagonist")
+        self.scene.add_sprite_list(LAYER_PLATFORM)
+        self.scene.add_sprite_list(LAYER_PROTAGONIST)
 
         arcade.set_background_color(arcade.color.RED_DEVIL)
 
@@ -118,18 +118,12 @@ class GameView(arcade.View):
         corner_sprite_left:arcade.Sprite = arcade.Sprite(CORNER_PIECE_LEFT, TILE_SCALING)
         corner_sprite_left.center_x = PLATFORM_CENTER_X
         corner_sprite_left.center_y = PLATFORM_CENTER_Y
-        self.scene.add_sprite("Platform", corner_sprite_left)
+        self.scene.add_sprite(LAYER_PLATFORM, corner_sprite_left)
 
         #adding middle sprites
-        for i in range(PLATFORM_WIDTH + PLATFORM_CENTER_X, SCREEN_WIDTH, PLATFORM_WIDTH):
-            middle_sprite:arcade.Sprite = arcade.Sprite(MIDDLE_PIECE, TILE_SCALING)
-            middle_sprite.center_x = i  
-            middle_sprite.center_y = PLATFORM_CENTER_Y
-            self.scene.add_sprite("Platform", middle_sprite)                        
+        self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, platforms=self.scene["Platform"]) 
-
-
 
     def on_show_view(self)->None:
         """Display window on function call"""
@@ -148,6 +142,20 @@ class GameView(arcade.View):
         self.protagonist.set_pos_left(CHARACTER_LEFT)
         for i in self.scene[LAYER_PLATFORM]:
             i.change_x=-GAME_SPEED
+            
+        if self.scene[LAYER_PLATFORM][0].right <= 0:
+            self.scene[LAYER_PLATFORM].pop(0)
+
+        if (len(self.scene[LAYER_PLATFORM]) < SCREEN_WIDTH // PLATFORM_WIDTH + 2):
+            self.generate_platform(int(self.scene[LAYER_PLATFORM][-1].right) + PLATFORM_WIDTH // 2 - GAME_SPEED)
+
+    def generate_platform(self, start:int):
+        """Generates the platform"""
+        for i in range(start, start + SCREEN_WIDTH * 2, PLATFORM_WIDTH):
+            middle_sprite:arcade.Sprite = arcade.Sprite(MIDDLE_PIECE, TILE_SCALING, 
+                                                        center_x=i, 
+                                                        center_y=PLATFORM_CENTER_Y)
+            self.scene.add_sprite(LAYER_PLATFORM, middle_sprite)
 
     def process_key_change(self) -> None:
         """Called after any recorded change in key to update the local variables appropriately"""
