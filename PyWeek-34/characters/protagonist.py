@@ -3,7 +3,7 @@ import arcade
 
 PROTAGONIST_SCALING:float = 0.22
 PROTAGONIST_SPEED:int = 10
-PROTAGONIST_JUMP_SPEED:int = 5
+PROTAGONIST_JUMP_SPEED:int = 20
 
 #Constants for getting Images from Sprite List
 IMAGE_PIXEL_HEIGHT:int = 599
@@ -27,6 +27,10 @@ class Protagonist(arcade.Sprite):
     def set_pos_x(self, x:int) -> None:
         """Set the x coordinate of the player"""
         self.center_x = x
+    
+    def set_pos_left(self, x:int) -> None:
+        """Set the left boundary of the player"""
+        self.left = x   
 
     def set_pos_y(self, y:int) -> None:
         """Set the y coordinate of the player"""
