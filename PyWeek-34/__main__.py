@@ -4,13 +4,12 @@ import os
 import sys
 sys.path.append(os.getcwd() + r"\PyWeek-34")
 from characters.protagonist import Protagonist
+from characters.clouds import Cloud
 
 #screen constants
 SCREEN_WIDTH:int = 1000
-SCREEN_HEIGTH:int = 480
+SCREEN_HEIGHT:int = 480
 SCREEN_TITLE:str = "PyWeek-34"
-
-
 
 #scaling constants
 TILE_SCALING:float = 0.5
@@ -44,7 +43,7 @@ BACKGROUND:str = r"resources/Game Assets/deserttileset/png/BG.png"
 LAYER_PLATFORM:str = "Platform"
 LAYER_PROTAGONIST:str = "Protagonist"
 LAYER_CLOUD:str = "Clouds"
-LAYER_ENVIROMENT:str = "Enviroment"
+LAYER_ENVIRONMENT:str = "Environment"
 
 LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
     LAYER_PLATFORM : {
@@ -103,6 +102,7 @@ class GameView(arcade.View):
         self.scene = arcade.Scene()
         self.scene.add_sprite_list(LAYER_PLATFORM)
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
+        self.scene.add_sprite_list(LAYER_CLOUD)
 
         #creating the protagonist
         self.protagonist = Protagonist()
@@ -119,12 +119,13 @@ class GameView(arcade.View):
         #adding middle sprites
         self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)
 
-        #creating clouds sprite list containing all cloud variants
-        clouds_sprite_list:arcade.SpriteList = arcade.SpriteList()
-        for i in range(1, 5):
-            cloud_asset = f"resources/Game Assets/background-elements-redux-fix/PNG/Retina/cloud{i}.png"
-            clouds_sprite_list.append(arcade.Sprite(cloud_asset, TILE_SCALING))
-
+        #adding two clouds for initiliazation
+        first_cloud:Cloud = Cloud()
+        second_cloud:Cloud = Cloud(SCREEN_WIDTH)
+        print(first_cloud.center_x)
+        print(second_cloud.center_y)
+        self.scene.add_sprite(LAYER_CLOUD, first_cloud)
+        self.scene.add_sprite(LAYER_CLOUD, second_cloud)
 
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, platforms=self.scene["Platform"]) 
@@ -136,7 +137,7 @@ class GameView(arcade.View):
     def on_draw(self)->None:
         """Instructions to generate the layout of the window"""
         self.clear()
-        arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGTH, self.background)
+        arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
         self.scene.draw()
 
     def on_update(self, delta_time: float):
@@ -147,14 +148,15 @@ class GameView(arcade.View):
 
         self.process_key_change()
         self.protagonist.set_pos_left(CHARACTER_LEFT)
-        for i in self.scene[LAYER_PLATFORM]:
-            i.change_x=-GAME_SPEED
-            
-        if self.scene[LAYER_PLATFORM][0].right <= 0:
-            self.scene[LAYER_PLATFORM].pop(0)
+        self.move_and_pop(LAYER_PLATFORM)
+        self.move_and_pop(LAYER_CLOUD)
 
         if (len(self.scene[LAYER_PLATFORM]) < SCREEN_WIDTH // PLATFORM_WIDTH + 2):
             self.generate_platform(int(self.scene[LAYER_PLATFORM][-1].right) + PLATFORM_WIDTH // 2 - GAME_SPEED)
+
+        if (len(self.scene[LAYER_CLOUD]) < 2):
+            next_cloud:Cloud = Cloud(SCREEN_WIDTH)
+            self.scene.add_sprite(LAYER_CLOUD, next_cloud)
 
     def generate_platform(self, start:int):
         """Generates the platform"""
@@ -164,7 +166,15 @@ class GameView(arcade.View):
                                                         center_y=PLATFORM_CENTER_Y)
             self.scene.add_sprite(LAYER_PLATFORM, middle_sprite)
 
-    
+    def move_and_pop(self, layer:str) -> None:
+        """Moves all the sprites in the layer and pops the ones that are out of the screen"""
+        for i in self.scene[layer]:
+            if layer == LAYER_CLOUD:
+                print(i.center_x)
+            i.change_x=-GAME_SPEED
+            
+        if self.scene[layer][0].right <= 0:
+            self.scene[layer].pop(0)
 
     def process_key_change(self) -> None:
         """Called after any recorded change in key to update the local variables appropriately"""
@@ -208,7 +218,7 @@ def main()->None:
     """Main function for calling setup functions and running module"""
     reset_dir()
 
-    window:arcade.Window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGTH, SCREEN_TITLE)
+    window:arcade.Window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     window.center_window = True
     menu_view:MainMenu = MainMenu()
     window.show_view(menu_view)
