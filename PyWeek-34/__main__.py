@@ -127,7 +127,6 @@ class GameView(arcade.View):
             middle_sprite.center_y = PLATFORM_CENTER_Y
             self.scene.add_sprite("Platform", middle_sprite)                        
 
-
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, platforms=self.scene["Platform"]) 
 
 
@@ -146,6 +145,7 @@ class GameView(arcade.View):
         """Specify the computations at each refresh"""
         self.physics_engine.update()
         self.process_key_change()
+        self.protagonist.set_pos_left(CHARACTER_LEFT)
         for i in self.scene[LAYER_PLATFORM]:
             i.change_x=-GAME_SPEED
 
