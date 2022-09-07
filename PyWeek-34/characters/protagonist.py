@@ -8,7 +8,11 @@ class Protagonist(arcade.Sprite):
 
     def __init__(self) -> None:
         """Initialize the character"""
-        super().__init__(":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png")
+        super().__init__()
+        self.idle_texture = arcade.load_texture(":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png")
+        self.jump_texture = arcade.load_texture(":resources:images/animated_characters/female_adventurer/femaleAdventurer_jump.png")
+        self.fall_texture = arcade.load_texture(":resources:images/animated_characters/female_adventurer/femaleAdventurer_fall.png")
+        self.texture = self.idle_texture
         self.horizontal_vel:int = PROTAGONIST_SPEED
         self.jump_vel:int = PROTAGONIST_JUMP_SPEED
         
@@ -59,3 +63,14 @@ class Protagonist(arcade.Sprite):
     def jump(self) -> None:
         """Update the y-velocity for jumping"""
         self.update_vel_y(self.jump_vel)
+
+    def update_animation(self, delta_time: float) -> None:
+        """Update the animation of the Protagonist at every call"""
+
+        # FOR JUMPING
+        if self.change_y > 0:
+            self.texture = self.jump_texture
+        elif self.change_y < 0:
+            self.texture = self.fall_texture
+        else:
+            self.texture = self.idle_texture
