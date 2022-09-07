@@ -1,7 +1,8 @@
 import typing
 import arcade
 import os
-os.chdir(os.getcwd() + r'\PyWeek-34')   #Changing current directory temporarily for importing rewuired character classes
+import sys
+sys.path.append(os.getcwd() + r"\PyWeek-34")
 from characters.protagonist import Protagonist
 
 #screen constants
@@ -52,14 +53,11 @@ LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
 }
 
 
-def validate()->bool:
-    """Checks if the code is run from the proper directory"""
-    if os.path.isdir("PyWeek-34"):
-        file_path = os.path.dirname(os.path.abspath(__file__))
-        os.chdir(file_path)
-        return True
-    else: 
-        return False
+def reset_dir()->bool:
+    """Resets the current working directory to file path of this file"""
+    file_path = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(file_path)
+    return True
 
 class MainMenu(arcade.View):
 
@@ -138,6 +136,9 @@ class GameView(arcade.View):
     def on_update(self, delta_time: float):
         """Specify the computations at each refresh"""
         self.physics_engine.update()
+
+        self.scene.update_animation(delta_time, [LAYER_PROTAGONIST])
+
         self.process_key_change()
         self.protagonist.set_pos_left(CHARACTER_LEFT)
         for i in self.scene[LAYER_PLATFORM]:
@@ -197,9 +198,7 @@ class GameView(arcade.View):
 
 def main()->None:
     """Main function for calling setup functions and running module"""
-
-    # if not validate():
-        # raise Exception("Run the script in the correct directory")
+    reset_dir()
 
     window:arcade.Window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGTH, SCREEN_TITLE)
     window.center_window = True
