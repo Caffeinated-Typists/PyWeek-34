@@ -13,7 +13,6 @@ SCREEN_TITLE:str = "PyWeek-34"
 
 
 #scaling constants
-CHARACTER_SCALING:float = 1
 TILE_SCALING:float = 0.5
 
 #Physics Constants
