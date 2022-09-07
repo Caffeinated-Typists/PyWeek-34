@@ -41,9 +41,10 @@ BACKGROUND:str = r"resources/Game Assets/deserttileset/png/BG.png"
 
 
 #map constants
-
 LAYER_PLATFORM:str = "Platform"
 LAYER_PROTAGONIST:str = "Protagonist"
+LAYER_CLOUD:str = "Clouds"
+LAYER_ENVIROMENT:str = "Enviroment"
 
 LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
     LAYER_PLATFORM : {
@@ -106,13 +107,11 @@ class GameView(arcade.View):
         self.scene.add_sprite_list(LAYER_PLATFORM)
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
 
-        arcade.set_background_color(arcade.color.RED_DEVIL)
-
+        #creating the protagonist
         self.protagonist = Protagonist()
         self.protagonist.set_pos_x(CHARACTER_BOTTOM + self.protagonist.width // 2)
         self.protagonist.set_pos_y(CHARACTER_LEFT + self.protagonist.height // 2)
         self.scene.add_sprite(LAYER_PROTAGONIST, self.protagonist)
-
 
         #adding corner piece
         corner_sprite_left:arcade.Sprite = arcade.Sprite(CORNER_PIECE_LEFT, TILE_SCALING)
@@ -122,6 +121,14 @@ class GameView(arcade.View):
 
         #adding middle sprites
         self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)
+
+        #creating clouds sprite list containing all cloud variants
+        clouds_sprite_list:arcade.SpriteList = arcade.SpriteList()
+        for i in range(1, 5):
+            cloud_asset = f"resources/Game Assets/background-elements-redux-fix/PNG/Retina/cloud{i}.png"
+            clouds_sprite_list.append(arcade.Sprite(cloud_asset, TILE_SCALING))
+
+
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, platforms=self.scene["Platform"]) 
 
@@ -156,6 +163,8 @@ class GameView(arcade.View):
                                                         center_x=i, 
                                                         center_y=PLATFORM_CENTER_Y)
             self.scene.add_sprite(LAYER_PLATFORM, middle_sprite)
+
+    
 
     def process_key_change(self) -> None:
         """Called after any recorded change in key to update the local variables appropriately"""
