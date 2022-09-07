@@ -1,18 +1,24 @@
 import typing
 import arcade
 
+PROTAGONIST_SCALING:float = 0.5
 PROTAGONIST_SPEED:int = 10
 PROTAGONIST_JUMP_SPEED:int = 5
+
+#Constants for getting Images from Sprite List
+IMAGE_PIXEL_HEIGHT:int = 599
+IMAGE_PIXEL_WIDTH:int = 692
 
 class Protagonist(arcade.Sprite):
 
     def __init__(self) -> None:
         """Initialize the character"""
-        super().__init__()
-        self.idle_texture = arcade.load_texture(":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png")
-        self.jump_texture = arcade.load_texture(":resources:images/animated_characters/female_adventurer/femaleAdventurer_jump.png")
-        self.fall_texture = arcade.load_texture(":resources:images/animated_characters/female_adventurer/femaleAdventurer_fall.png")
+        super().__init__(scale = PROTAGONIST_SCALING)
+        self.idle_texture = arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_flying_no_movement.png", x = 0, y = 0, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT, hit_box_algorithm='Detailed') 
+        self.jump_texture = arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_flying_no_movement.png", x = 0, y = 0, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT, hit_box_algorithm='Detailed')
+        self.fall_texture = arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_flying_no_movement.png", x = 0, y = 0, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT, hit_box_algorithm='Detailed')
         self.texture = self.idle_texture
+        # super().__init__("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_flying_no_movement.png")
         self.horizontal_vel:int = PROTAGONIST_SPEED
         self.jump_vel:int = PROTAGONIST_JUMP_SPEED
         
