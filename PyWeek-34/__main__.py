@@ -5,6 +5,7 @@ import sys
 sys.path.append(os.getcwd() + r"\PyWeek-34")
 from characters.protagonist import Protagonist
 from characters.clouds import Cloud
+from foliage.foliage import Foliage
 
 #screen constants
 SCREEN_WIDTH:int = 1000
@@ -16,7 +17,7 @@ TILE_SCALING:float = 0.5
 
 #Physics Constants
 GRAVITY:float = 1
-GAME_SPEED:int = 5
+GAME_SPEED:int = 8
 CLOUD_SPEED:float = 0.1 * GAME_SPEED
 
 # Tile Constants
@@ -99,10 +100,12 @@ class GameView(arcade.View):
         """Setup all the variables and maps here"""
         # map_file:str = "PyWeek-34/resources/Game Maps/main.json"
         self.background = arcade.load_texture(BACKGROUND)
-
+        
         self.scene = arcade.Scene()
+        #adding the layers
         self.scene.add_sprite_list(LAYER_PLATFORM)
         self.scene.add_sprite_list(LAYER_CLOUD)
+        self.scene.add_sprite_list(LAYER_ENVIRONMENT)
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
 
         self.scene[LAYER_CLOUD].alpha = 128
@@ -128,6 +131,11 @@ class GameView(arcade.View):
         self.scene.add_sprite(LAYER_CLOUD, first_cloud)
         self.scene.add_sprite(LAYER_CLOUD, second_cloud)
 
+        #initialize foliage
+        first_foliage:Foliage = Foliage()
+        second_foliage:Foliage = Foliage(SCREEN_WIDTH)
+        self.scene.add_sprite(LAYER_ENVIRONMENT, first_foliage)
+        self.scene.add_sprite(LAYER_ENVIRONMENT, second_foliage)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, platforms=self.scene["Platform"]) 
 
@@ -149,15 +157,26 @@ class GameView(arcade.View):
 
         self.process_key_change()
         self.protagonist.set_pos_left(CHARACTER_LEFT)
+
+        #moving elements in the scene
         self.move_and_pop(LAYER_PLATFORM, GAME_SPEED)
         self.move_and_pop(LAYER_CLOUD, CLOUD_SPEED)
+        self.move_and_pop(LAYER_ENVIRONMENT, GAME_SPEED)
 
+        #adding platforms 
         if (len(self.scene[LAYER_PLATFORM]) < SCREEN_WIDTH // PLATFORM_WIDTH + 2):
             self.generate_platform(int(self.scene[LAYER_PLATFORM][-1].right) + PLATFORM_WIDTH // 2 - GAME_SPEED)
 
+        #adding clouds
         if (len(self.scene[LAYER_CLOUD]) < 2):
             next_cloud:Cloud = Cloud(SCREEN_WIDTH)
             self.scene.add_sprite(LAYER_CLOUD, next_cloud)
+
+        #adding foliage
+        if (len(self.scene[LAYER_ENVIRONMENT]) < 2):
+            next_foliage:Foliage = Foliage(SCREEN_WIDTH * 2)
+            self.scene.add_sprite(LAYER_ENVIRONMENT, next_foliage)
+
 
     def generate_platform(self, start:int):
         """Generates the platform"""
