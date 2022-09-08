@@ -43,12 +43,15 @@ BACKGROUND:str = r"resources/Game Assets/deserttileset/png/BG.png"
 #map constants
 
 LAYER_PLATFORM:str = "Platform"
+LAYER_CEILING:str = "Ceiling"
 LAYER_PROTAGONIST:str = "Protagonist"
 
 LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
     LAYER_PLATFORM : {
         "use_spatial_hash": False, 
         "sprite_scaling": TILE_SCALING},
+    LAYER_CEILING : {
+        "use_spatial_hash": False},
 }
 
 
@@ -90,6 +93,7 @@ class GameView(arcade.View):
         self.right_pressed:bool = False
         self.up_pressed:bool = False
         self.down_pressed:bool = False
+        self.shoot_pressed:bool = False
 
         self.protagonist:arcade.Sprite = None
 
@@ -102,6 +106,7 @@ class GameView(arcade.View):
 
         self.scene = arcade.Scene()
         self.scene.add_sprite_list(LAYER_PLATFORM)
+        self.scene.add_sprite_list(LAYER_CEILING)
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
 
         arcade.set_background_color(arcade.color.RED_DEVIL)
@@ -121,7 +126,9 @@ class GameView(arcade.View):
         #adding middle sprites
         self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)
 
-        self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, platforms=self.scene["Platform"]) 
+        self.generate_ceiling()
+
+        self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, platforms=self.scene[LAYER_PLATFORM], walls=self.scene[LAYER_CEILING]) 
 
     def on_show_view(self)->None:
         """Display window on function call"""
@@ -158,6 +165,12 @@ class GameView(arcade.View):
                                                         center_y=PLATFORM_CENTER_Y)
             self.scene.add_sprite(LAYER_PLATFORM, middle_sprite)
 
+    def generate_ceiling(self):
+        """Generates the ceiling for the Game Window"""
+        ceiling_sprite:arcade.Sprite = arcade.Sprite(center_x=SCREEN_WIDTH/10, center_y=SCREEN_HEIGTH)
+        ceiling_sprite.set_hit_box([[-SCREEN_WIDTH/10, -20], [SCREEN_WIDTH/5, 0]])
+        self.scene.add_sprite(LAYER_CEILING, ceiling_sprite)
+
     def process_key_change(self) -> None:
         """Called after any recorded change in key to update the local variables appropriately"""
 
@@ -171,8 +184,11 @@ class GameView(arcade.View):
 
         if self.up_pressed and self.physics_engine.can_jump():
             self.protagonist.jump()
-        if self.down_pressed:
+        if self.down_pressed and not self.physics_engine.can_jump():
             self.protagonist.duck()
+
+        if self.shoot_pressed:
+            self.protagonist.shoot()
 
     def on_key_press(self, key: int, modifiers: int)->None:
         """Function to process the key presses of the user"""
@@ -185,6 +201,9 @@ class GameView(arcade.View):
             self.up_pressed = True
         elif (key == arcade.key.DOWN or key == arcade.key.S) and not self.up_pressed:
             self.down_pressed = True
+
+        if key == arcade.key.Q:
+            self.shoot_pressed = True
 
         self.process_key_change()
 

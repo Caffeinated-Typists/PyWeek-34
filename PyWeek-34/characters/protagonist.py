@@ -30,7 +30,7 @@ class Protagonist(arcade.Sprite):
         self.horizontal_vel:int = PROTAGONIST_SPEED
         self.jump_vel:int = PROTAGONIST_JUMP_SPEED
         self.duck_vel:int = PROTAGONIST_DUCK_SPEED
-        self.set_hit_box([[33, -180], [33, -240]])
+        self.set_hit_box([[-33, 240], [33, -240]])
         
     def set_pos_x(self, x:int) -> None:
         """Set the x coordinate of the player"""
@@ -89,6 +89,9 @@ class Protagonist(arcade.Sprite):
         """Update the y-velocity to duck"""
         self.update_vel_y(self.duck_vel)
         self.is_jumping = False
+
+    def shoot(self) -> None:
+        """Shoot bullets at the opponent"""
 
     def update_animation(self, delta_time: float) -> None:
         """Update the animation of the Protagonist at every call"""
