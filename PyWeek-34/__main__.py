@@ -17,6 +17,7 @@ TILE_SCALING:float = 0.5
 #Physics Constants
 GRAVITY:float = 1
 GAME_SPEED:int = 5
+CLOUD_SPEED:float = 1 * GAME_SPEED
 
 # Tile Constants
 # 1. Platform
@@ -101,8 +102,10 @@ class GameView(arcade.View):
 
         self.scene = arcade.Scene()
         self.scene.add_sprite_list(LAYER_PLATFORM)
-        self.scene.add_sprite_list(LAYER_PROTAGONIST)
         self.scene.add_sprite_list(LAYER_CLOUD)
+        self.scene.add_sprite_list(LAYER_PROTAGONIST)
+
+        self.scene[LAYER_CLOUD].alpha = 128
 
         #creating the protagonist
         self.protagonist = Protagonist()
@@ -119,11 +122,13 @@ class GameView(arcade.View):
         #adding middle sprites
         self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)
 
-        #adding two clouds for initiliazation
+        #adding two clouds for initialization
         first_cloud:Cloud = Cloud()
-        second_cloud:Cloud = Cloud(SCREEN_WIDTH)
-        print(first_cloud.center_x)
-        print(second_cloud.center_y)
+        second_cloud:Cloud = Cloud()
+        # print(first_cloud.center_x)
+        # print(second_cloud.center_y)
+        first_cloud.randomize_all()
+        second_cloud.randomize_all(SCREEN_WIDTH)
         self.scene.add_sprite(LAYER_CLOUD, first_cloud)
         self.scene.add_sprite(LAYER_CLOUD, second_cloud)
 
@@ -148,14 +153,15 @@ class GameView(arcade.View):
 
         self.process_key_change()
         self.protagonist.set_pos_left(CHARACTER_LEFT)
-        self.move_and_pop(LAYER_PLATFORM)
-        self.move_and_pop(LAYER_CLOUD)
+        self.move_and_pop(LAYER_PLATFORM, GAME_SPEED)
+        self.move_and_pop(LAYER_CLOUD, CLOUD_SPEED)
 
         if (len(self.scene[LAYER_PLATFORM]) < SCREEN_WIDTH // PLATFORM_WIDTH + 2):
             self.generate_platform(int(self.scene[LAYER_PLATFORM][-1].right) + PLATFORM_WIDTH // 2 - GAME_SPEED)
 
         if (len(self.scene[LAYER_CLOUD]) < 2):
-            next_cloud:Cloud = Cloud(SCREEN_WIDTH)
+            next_cloud:Cloud = Cloud()
+            next_cloud.randomize_all(SCREEN_WIDTH)
             self.scene.add_sprite(LAYER_CLOUD, next_cloud)
 
     def generate_platform(self, start:int):
@@ -166,12 +172,10 @@ class GameView(arcade.View):
                                                         center_y=PLATFORM_CENTER_Y)
             self.scene.add_sprite(LAYER_PLATFORM, middle_sprite)
 
-    def move_and_pop(self, layer:str) -> None:
+    def move_and_pop(self, layer:str, speed:int) -> None:
         """Moves all the sprites in the layer and pops the ones that are out of the screen"""
         for i in self.scene[layer]:
-            if layer == LAYER_CLOUD:
-                print(i.center_x)
-            i.change_x=-GAME_SPEED
+            i.center_x = i.center_x-speed
             
         if self.scene[layer][0].right <= 0:
             self.scene[layer].pop(0)
