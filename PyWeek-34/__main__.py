@@ -11,13 +11,13 @@ SCREEN_HEIGTH:int = 480
 SCREEN_TITLE:str = "PyWeek-34"
 
 
-
+ 
 #scaling constants
 TILE_SCALING:float = 0.5
 
 #Physics Constants
-GRAVITY:float = 1
-GAME_SPEED:int = 5
+GRAVITY:float = 0.65
+GAME_SPEED:int = 10
 
 # Tile Constants
 # 1. Platform
@@ -45,6 +45,7 @@ BACKGROUND:str = r"resources/Game Assets/deserttileset/png/BG.png"
 LAYER_PLATFORM:str = "Platform"
 LAYER_CEILING:str = "Ceiling"
 LAYER_PROTAGONIST:str = "Protagonist"
+LAYER_BULLETS:str = "Bullets"
 
 LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
     LAYER_PLATFORM : {
@@ -89,11 +90,9 @@ class GameView(arcade.View):
         self.tile_map:arcade.tilemap.TileMap = None
         self.background:arcade.Texture = None
 
-        self.left_pressed:bool = False
-        self.right_pressed:bool = False
-        self.up_pressed:bool = False
-        self.down_pressed:bool = False
+        self.space_pressed:bool = False
         self.shoot_pressed:bool = False
+        self.can_shoot:bool = True
 
         self.protagonist:arcade.Sprite = None
 
@@ -108,6 +107,7 @@ class GameView(arcade.View):
         self.scene.add_sprite_list(LAYER_PLATFORM)
         self.scene.add_sprite_list(LAYER_CEILING)
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
+        self.scene.add_sprite_list(LAYER_BULLETS)
 
         arcade.set_background_color(arcade.color.RED_DEVIL)
 
@@ -145,6 +145,7 @@ class GameView(arcade.View):
         self.physics_engine.update()
 
         self.scene.update_animation(delta_time, [LAYER_PROTAGONIST])
+        self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS])
 
         self.process_key_change()
         self.protagonist.set_pos_left(CHARACTER_LEFT)
@@ -153,6 +154,8 @@ class GameView(arcade.View):
             
         if self.scene[LAYER_PLATFORM][0].right <= 0:
             self.scene[LAYER_PLATFORM].pop(0)
+
+        self.clear_extra_bullets()
 
         if (len(self.scene[LAYER_PLATFORM]) < SCREEN_WIDTH // PLATFORM_WIDTH + 2):
             self.generate_platform(int(self.scene[LAYER_PLATFORM][-1].right) + PLATFORM_WIDTH // 2 - GAME_SPEED)
@@ -174,53 +177,42 @@ class GameView(arcade.View):
     def process_key_change(self) -> None:
         """Called after any recorded change in key to update the local variables appropriately"""
 
-        # CODE FOR MOVING PROTAGONIST LEFT AND RIGHT, NOT REQUIRED RIGHT NOW
-        # if self.left_pressed and not self.right_pressed:
-        #     self.protagonist.go_left()
-        # elif self.right_pressed and not self.left_pressed:
-        #     self.protagonist.go_right()
-        # else:
-        #     self.protagonist.stationary_x()
+        if self.space_pressed:
+            self.protagonist.fly()
 
-        if self.up_pressed and self.physics_engine.can_jump():
-            self.protagonist.jump()
-        if self.down_pressed and not self.physics_engine.can_jump():
-            self.protagonist.duck()
-
-        if self.shoot_pressed:
-            self.protagonist.shoot()
+        if self.shoot_pressed and self.can_shoot:
+            self.protagonist.shoot(self.scene)
+            self.can_shoot = False
 
     def on_key_press(self, key: int, modifiers: int)->None:
         """Function to process the key presses of the user"""
 
-        if (key == arcade.key.LEFT or key == arcade.key.A) and not self.right_pressed:
-            self.left_pressed = True
-        elif (key == arcade.key.RIGHT or key == arcade.key.D) and not self.left_pressed:
-            self.right_pressed = True
-        if (key == arcade.key.UP or key == arcade.key.W) and not self.down_pressed:
-            self.up_pressed = True
-        elif (key == arcade.key.DOWN or key == arcade.key.S) and not self.up_pressed:
-            self.down_pressed = True
-
         if key == arcade.key.Q:
             self.shoot_pressed = True
+
+        if key == arcade.key.SPACE:
+            self.space_pressed = True
 
         self.process_key_change()
 
     def on_key_release(self, key: int, modifiers: int):
         """Process when a key is released by the user"""
+        
+        if key == arcade.key.Q:
+            self.shoot_pressed = False
+            self.can_shoot = True
 
-        if key == arcade.key.LEFT or key == arcade.key.A:
-            self.left_pressed = False
-        if key == arcade.key.RIGHT or key == arcade.key.D:
-            self.right_pressed = False
-        if key == arcade.key.UP or key == arcade.key.W:
-            self.up_pressed = False
-        if key == arcade.key.DOWN or key == arcade.key.S:
-            self.down_pressed = False
+        if key == arcade.key.SPACE:
+            self.space_pressed = False
 
         self.process_key_change()
 
+    def clear_extra_bullets(self) -> None:
+        """Remove bullets which have left the screen out of Sprite list"""
+
+        for bullet in self.scene[LAYER_BULLETS]:
+            if bullet.left > SCREEN_WIDTH:
+                bullet.remove_from_sprite_lists()
 
 def main()->None:
     """Main function for calling setup functions and running module"""
