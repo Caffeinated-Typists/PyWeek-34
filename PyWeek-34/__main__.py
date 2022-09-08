@@ -4,7 +4,7 @@ import os
 import sys
 sys.path.append(os.getcwd() + r"\PyWeek-34")
 from characters.protagonist import Protagonist
-from characters.clouds import Cloud
+from clouds.clouds import Cloud
 from foliage.foliage import Foliage
 
 #screen constants
@@ -46,6 +46,7 @@ LAYER_PLATFORM:str = "Platform"
 LAYER_PROTAGONIST:str = "Protagonist"
 LAYER_CLOUD:str = "Clouds"
 LAYER_ENVIRONMENT:str = "Environment"
+LAYER_TEMP:str = "Temp"
 
 LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
     LAYER_PLATFORM : {
@@ -107,8 +108,9 @@ class GameView(arcade.View):
         self.scene.add_sprite_list(LAYER_CLOUD)
         self.scene.add_sprite_list(LAYER_ENVIRONMENT)
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
+        self.scene.add_sprite_list(LAYER_TEMP)
 
-        self.scene[LAYER_CLOUD].alpha = 128
+        self.scene[LAYER_CLOUD].alpha = 100
 
         #creating the protagonist
         self.protagonist = Protagonist()
@@ -121,6 +123,12 @@ class GameView(arcade.View):
         corner_sprite_left.center_x = PLATFORM_CENTER_X
         corner_sprite_left.center_y = PLATFORM_CENTER_Y
         self.scene.add_sprite(LAYER_PLATFORM, corner_sprite_left)
+        
+        # temp sprite
+        temp_sprite:arcade.Sprite = arcade.Sprite(r"C:\Users\aniru\Downloads\sketch1662664053401.png", 0.3)
+        temp_sprite.center_x = 700
+        temp_sprite.center_y = PLATFORM_CENTER_Y + 100
+        self.scene.add_sprite(LAYER_ENVIRONMENT, temp_sprite)
 
         #adding middle sprites
         self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)

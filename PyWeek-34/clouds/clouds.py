@@ -8,12 +8,12 @@ SCREEN_HEIGHT:int = 480
 
 class Cloud(arcade.Sprite):
     def __init__(self, position:int = 0) -> None:
-        super().__init__(filename=f"characters/Clouds/cloud{random.randint(1, 4)}.png", scale=CLOUD_SCALING)
+        super().__init__(filename=f"clouds/Assets/cloud{random.randint(1, 4)}.png", scale=CLOUD_SCALING)
         self.randomize_all(position)
 
     def randomize_image(self) -> None:
         """Randomizes the image of the cloud"""
-        cloud_path = f"characters/Clouds/cloud{random.randint(1, 4)}.png"
+        cloud_path = f"clouds/Assets/cloud{random.randint(1, 4)}.png"
         self.texture = arcade.load_texture(cloud_path)
     
     def randomize_x(self, position:int = 0) -> None:
