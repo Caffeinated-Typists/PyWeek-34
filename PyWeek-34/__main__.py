@@ -17,7 +17,7 @@ TILE_SCALING:float = 0.5
 #Physics Constants
 GRAVITY:float = 1
 GAME_SPEED:int = 5
-CLOUD_SPEED:float = 1 * GAME_SPEED
+CLOUD_SPEED:float = 0.1 * GAME_SPEED
 
 # Tile Constants
 # 1. Platform
@@ -124,11 +124,7 @@ class GameView(arcade.View):
 
         #adding two clouds for initialization
         first_cloud:Cloud = Cloud()
-        second_cloud:Cloud = Cloud()
-        # print(first_cloud.center_x)
-        # print(second_cloud.center_y)
-        first_cloud.randomize_all()
-        second_cloud.randomize_all(SCREEN_WIDTH)
+        second_cloud:Cloud = Cloud(SCREEN_WIDTH)
         self.scene.add_sprite(LAYER_CLOUD, first_cloud)
         self.scene.add_sprite(LAYER_CLOUD, second_cloud)
 
@@ -160,8 +156,7 @@ class GameView(arcade.View):
             self.generate_platform(int(self.scene[LAYER_PLATFORM][-1].right) + PLATFORM_WIDTH // 2 - GAME_SPEED)
 
         if (len(self.scene[LAYER_CLOUD]) < 2):
-            next_cloud:Cloud = Cloud()
-            next_cloud.randomize_all(SCREEN_WIDTH)
+            next_cloud:Cloud = Cloud(SCREEN_WIDTH)
             self.scene.add_sprite(LAYER_CLOUD, next_cloud)
 
     def generate_platform(self, start:int):
