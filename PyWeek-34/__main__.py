@@ -89,6 +89,7 @@ class GameView(arcade.View):
         self.left_pressed:bool = False
         self.right_pressed:bool = False
         self.up_pressed:bool = False
+        self.down_pressed:bool = False
 
         self.protagonist:arcade.Sprite = None
 
@@ -160,25 +161,30 @@ class GameView(arcade.View):
     def process_key_change(self) -> None:
         """Called after any recorded change in key to update the local variables appropriately"""
 
-        if self.left_pressed and not self.right_pressed:
-            self.protagonist.go_left()
-        elif self.right_pressed and not self.left_pressed:
-            self.protagonist.go_right()
-        else:
-            self.protagonist.stationary_x()
+        # CODE FOR MOVING PROTAGONIST LEFT AND RIGHT, NOT REQUIRED RIGHT NOW
+        # if self.left_pressed and not self.right_pressed:
+        #     self.protagonist.go_left()
+        # elif self.right_pressed and not self.left_pressed:
+        #     self.protagonist.go_right()
+        # else:
+        #     self.protagonist.stationary_x()
 
         if self.up_pressed and self.physics_engine.can_jump():
             self.protagonist.jump()
+        if self.down_pressed:
+            self.protagonist.duck()
 
     def on_key_press(self, key: int, modifiers: int)->None:
         """Function to process the key presses of the user"""
 
-        if key == arcade.key.LEFT or key == arcade.key.A:
+        if (key == arcade.key.LEFT or key == arcade.key.A) and not self.right_pressed:
             self.left_pressed = True
-        if key == arcade.key.RIGHT or key == arcade.key.D:
+        elif (key == arcade.key.RIGHT or key == arcade.key.D) and not self.left_pressed:
             self.right_pressed = True
-        if key == arcade.key.UP or key == arcade.key.W:
+        if (key == arcade.key.UP or key == arcade.key.W) and not self.down_pressed:
             self.up_pressed = True
+        elif (key == arcade.key.DOWN or key == arcade.key.S) and not self.up_pressed:
+            self.down_pressed = True
 
         self.process_key_change()
 
@@ -191,6 +197,8 @@ class GameView(arcade.View):
             self.right_pressed = False
         if key == arcade.key.UP or key == arcade.key.W:
             self.up_pressed = False
+        if key == arcade.key.DOWN or key == arcade.key.S:
+            self.down_pressed = False
 
         self.process_key_change()
 

@@ -4,6 +4,7 @@ import arcade
 PROTAGONIST_SCALING:float = 0.22
 PROTAGONIST_SPEED:int = 10
 PROTAGONIST_JUMP_SPEED:int = 20
+PROTAGONIST_DUCK_SPEED:int = -20
 
 #Constants for getting Images from Sprite List
 IMAGE_PIXEL_HEIGHT:int = 599
@@ -18,7 +19,7 @@ class Protagonist(arcade.Sprite):
         self.flying_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_flying_no_movement.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(10)]
         self.running_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_standing_run.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
         self.walking_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_standing_walk.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
-        self.jumping_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_standing_jump.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(10)]
+        self.jumping_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_flying_no_movement.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(10)]
         self.texture:arcade.Texture = self.idle_texture
 
         self.is_flying:bool = False
@@ -28,7 +29,8 @@ class Protagonist(arcade.Sprite):
 
         self.horizontal_vel:int = PROTAGONIST_SPEED
         self.jump_vel:int = PROTAGONIST_JUMP_SPEED
-        self.set_hit_box([[33, -180], [33, -270]])
+        self.duck_vel:int = PROTAGONIST_DUCK_SPEED
+        self.set_hit_box([[33, -180], [33, -240]])
         
     def set_pos_x(self, x:int) -> None:
         """Set the x coordinate of the player"""
@@ -83,6 +85,11 @@ class Protagonist(arcade.Sprite):
         self.update_vel_y(self.jump_vel)
         self.is_jumping = True
 
+    def duck(self) -> None:
+        """Update the y-velocity to duck"""
+        self.update_vel_y(self.duck_vel)
+        self.is_jumping = False
+
     def update_animation(self, delta_time: float) -> None:
         """Update the animation of the Protagonist at every call"""
 
@@ -94,17 +101,17 @@ class Protagonist(arcade.Sprite):
             if self.cur_texture >= len(self.flying_textures):
                 self.cur_texture = 0
             self.texture = self.flying_textures[self.cur_texture]
-        elif self.is_jumping:     #If the Protagonist is jumping
+        elif self.is_jumping:       #If the Protagonist is jumping
                 self.cur_texture += 1
                 if self.cur_texture >= len(self.jumping_textures):
                     self.cur_texture = 0
                 self.texture = self.jumping_textures[self.cur_texture]
-        elif self.is_running:   #If the Protagonist is running
+        elif self.is_running:       #If the Protagonist is running
             self.cur_texture += 1
             if self.cur_texture >= len(self.running_textures):
                 self.cur_texture = 0
             self.texture = self.running_textures[self.cur_texture]
-        else:                   #If the Protagonist is walking
+        else:                       #If the Protagonist is walking
             self.cur_texture += 1
             if self.cur_texture >= len(self.walking_textures):
                 self.cur_texture = 0
