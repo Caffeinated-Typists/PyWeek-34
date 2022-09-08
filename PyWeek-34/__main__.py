@@ -1,3 +1,4 @@
+from turtle import position
 import typing
 import arcade
 import os
@@ -6,6 +7,9 @@ sys.path.append(os.getcwd() + r"\PyWeek-34")
 from characters.protagonist import Protagonist
 from clouds.clouds import Cloud
 from foliage.foliage import Foliage
+from env_objects.env_objects import EnvObject
+
+
 
 #screen constants
 SCREEN_WIDTH:int = 1000
@@ -46,6 +50,7 @@ LAYER_PLATFORM:str = "Platform"
 LAYER_PROTAGONIST:str = "Protagonist"
 LAYER_CLOUD:str = "Clouds"
 LAYER_ENVIRONMENT:str = "Environment"
+LAYER_OBJECTS:str = "Objects"
 LAYER_TEMP:str = "Temp"
 
 LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
@@ -54,6 +59,13 @@ LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
         "sprite_scaling": TILE_SCALING},
 }
 
+
+#set of objects to be used
+OBJECTS:dict[str:typing.Optional] = {
+    LAYER_CLOUD: Cloud, 
+    LAYER_ENVIRONMENT: Foliage,
+    LAYER_OBJECTS: EnvObject,
+    }
 
 def reset_dir()->bool:
     """Resets the current working directory to file path of this file"""
@@ -107,8 +119,9 @@ class GameView(arcade.View):
         self.scene.add_sprite_list(LAYER_PLATFORM)
         self.scene.add_sprite_list(LAYER_CLOUD)
         self.scene.add_sprite_list(LAYER_ENVIRONMENT)
-        self.scene.add_sprite_list(LAYER_PROTAGONIST)
         self.scene.add_sprite_list(LAYER_TEMP)
+        self.scene.add_sprite_list(LAYER_PROTAGONIST)
+
 
         self.scene[LAYER_CLOUD].alpha = 100
 
@@ -125,10 +138,13 @@ class GameView(arcade.View):
         self.scene.add_sprite(LAYER_PLATFORM, corner_sprite_left)
         
         # temp sprite
-        temp_sprite:arcade.Sprite = arcade.Sprite(r"C:\Users\aniru\Downloads\sketch1662664053401.png", 0.3)
-        temp_sprite.center_x = 700
-        temp_sprite.center_y = PLATFORM_CENTER_Y + 100
-        self.scene.add_sprite(LAYER_ENVIRONMENT, temp_sprite)
+        # temp_sprite:arcade.Sprite = arcade.Sprite(r"C:\Users\aniru\Downloads\sketch1662664053401.png", 0.3)
+        # temp_sprite.center_x = 700
+        # temp_sprite.center_y = PLATFORM_CENTER_Y + 100
+        # self.scene.add_sprite(LAYER_ENVIRONMENT, temp_sprite)
+        #environment sprites
+        env_sprite:arcade.Sprite = EnvObject()
+        self.scene.add_sprite(LAYER_ENVIRONMENT, env_sprite)
 
         #adding middle sprites
         self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)
@@ -175,15 +191,9 @@ class GameView(arcade.View):
         if (len(self.scene[LAYER_PLATFORM]) < SCREEN_WIDTH // PLATFORM_WIDTH + 2):
             self.generate_platform(int(self.scene[LAYER_PLATFORM][-1].right) + PLATFORM_WIDTH // 2 - GAME_SPEED)
 
-        #adding clouds
-        if (len(self.scene[LAYER_CLOUD]) < 2):
-            next_cloud:Cloud = Cloud(SCREEN_WIDTH)
-            self.scene.add_sprite(LAYER_CLOUD, next_cloud)
-
-        #adding foliage
-        if (len(self.scene[LAYER_ENVIRONMENT]) < 2):
-            next_foliage:Foliage = Foliage(SCREEN_WIDTH * 2)
-            self.scene.add_sprite(LAYER_ENVIRONMENT, next_foliage)
+        #adding clouds, and foliage
+        self.add_layer_sprites(LAYER_CLOUD, 2, 1, SCREEN_WIDTH)
+        self.add_layer_sprites(LAYER_ENVIRONMENT, 2, 1, SCREEN_WIDTH)
 
 
     def generate_platform(self, start:int):
@@ -201,6 +211,14 @@ class GameView(arcade.View):
             
         if self.scene[layer][0].right <= 0:
             self.scene[layer].pop(0)
+
+    
+    def add_layer_sprites(self, layer:str, threshold:int, no_of_objects:int, start_position:int) -> None:
+        """Adds new items(with start_position) to the specified layer, if number of objects is less than threshold"""
+        if len(self.scene[layer]) < threshold:
+            for i in range(no_of_objects):
+                temp_sprite:arcade.Sprite = OBJECTS[layer](position=start_position)
+                self.scene.add_sprite(layer, temp_sprite)
 
     def process_key_change(self) -> None:
         """Called after any recorded change in key to update the local variables appropriately"""
