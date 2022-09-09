@@ -1,13 +1,19 @@
+from turtle import position
 import typing
 import arcade
 import os
 import sys
 sys.path.append(os.getcwd() + r"\PyWeek-34")
 from characters.protagonist import Protagonist
+from clouds.clouds import Cloud
+from foliage.foliage import Foliage
+from env_objects.env_objects import EnvObject
+
+
 
 #screen constants
 SCREEN_WIDTH:int = 1000
-SCREEN_HEIGTH:int = 480
+SCREEN_HEIGHT:int = 480
 SCREEN_TITLE:str = "PyWeek-34"
 
 
@@ -17,7 +23,8 @@ TILE_SCALING:float = 0.5
 
 #Physics Constants
 GRAVITY:float = 0.6
-GAME_SPEED:int = 10
+GAME_SPEED:int = 8
+CLOUD_SPEED:float = 0.1 * GAME_SPEED
 
 # Tile Constants
 # 1. Platform
@@ -41,20 +48,21 @@ BACKGROUND:str = r"resources/Game Assets/deserttileset/png/BG.png"
 
 
 #map constants
-
 LAYER_PLATFORM:str = "Platform"
 LAYER_CEILING:str = "Ceiling"
 LAYER_PROTAGONIST:str = "Protagonist"
+LAYER_CLOUD:str = "Clouds"
+LAYER_ENVIRONMENT:str = "Environment"
+LAYER_OBJECTS:str = "Objects"
+LAYER_TEMP:str = "Temp"
+
+#set of objects to be used
+OBJECTS:dict[str:typing.Optional] = {
+    LAYER_CLOUD: Cloud, 
+    LAYER_ENVIRONMENT: Foliage,
+    LAYER_OBJECTS: EnvObject,
+    }
 LAYER_BULLETS:str = "Bullets"
-
-LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
-    LAYER_PLATFORM : {
-        "use_spatial_hash": False, 
-        "sprite_scaling": TILE_SCALING},
-    LAYER_CEILING : {
-        "use_spatial_hash": False},
-}
-
 
 def reset_dir()->bool:
     """Resets the current working directory to file path of this file"""
@@ -64,6 +72,11 @@ def reset_dir()->bool:
 
 class MainMenu(arcade.View):
 
+    def __init__(self):
+        """Initializes the main menu"""
+        super().__init__()
+        self.background:arcade.Texture = arcade.load_texture(BACKGROUND)
+
     def on_show(self)->None:
         """Display window on function call"""
         arcade.set_background_color(arcade.color.RED_BROWN)
@@ -71,6 +84,8 @@ class MainMenu(arcade.View):
     def on_draw(self)->None:
         """Instructions for layout of window"""
         self.clear()
+        arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
+
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         """When mouse is clicked, start game"""
@@ -87,7 +102,6 @@ class GameView(arcade.View):
         arcade.set_background_color(arcade.color.RED_BROWN)
 
         self.scene:arcade.Scene = None
-        self.tile_map:arcade.tilemap.TileMap = None
         self.background:arcade.Texture = None
 
         self.space_pressed:bool = False
@@ -100,31 +114,60 @@ class GameView(arcade.View):
 
     def setup(self)->None:
         """Setup all the variables and maps here"""
-        # map_file:str = "PyWeek-34/resources/Game Maps/main.json"
         self.background = arcade.load_texture(BACKGROUND)
-
+        
         self.scene = arcade.Scene()
+        #adding the layers
         self.scene.add_sprite_list(LAYER_PLATFORM)
+        self.scene.add_sprite_list(LAYER_CLOUD)
+        self.scene.add_sprite_list(LAYER_ENVIRONMENT)
+        self.scene.add_sprite_list(LAYER_TEMP)
+        self.scene.add_sprite_list(LAYER_OBJECTS)
+
         self.scene.add_sprite_list(LAYER_CEILING)
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
         self.scene.add_sprite_list(LAYER_BULLETS)
 
-        arcade.set_background_color(arcade.color.RED_DEVIL)
+        self.scene[LAYER_CLOUD].alpha = 100
 
+        #creating the protagonist
         self.protagonist = Protagonist()
         self.protagonist.set_pos_x(CHARACTER_BOTTOM + self.protagonist.width // 2)
         self.protagonist.set_pos_y(CHARACTER_LEFT + self.protagonist.height // 2)
         self.scene.add_sprite(LAYER_PROTAGONIST, self.protagonist)
-
 
         #adding corner piece
         corner_sprite_left:arcade.Sprite = arcade.Sprite(CORNER_PIECE_LEFT, TILE_SCALING)
         corner_sprite_left.center_x = PLATFORM_CENTER_X
         corner_sprite_left.center_y = PLATFORM_CENTER_Y
         self.scene.add_sprite(LAYER_PLATFORM, corner_sprite_left)
+        
+        # temp sprite
+        # temp_sprite:arcade.Sprite = arcade.Sprite(r"C:\Users\aniru\Downloads\sketch1662664053401.png", 0.3)
+        # temp_sprite.center_x = 700
+        # temp_sprite.center_y = PLATFORM_CENTER_Y + 100
+        # self.scene.add_sprite(LAYER_ENVIRONMENT, temp_sprite)
+
+        #environment sprites
+        env_sprite_1:arcade.Sprite = EnvObject(SCREEN_WIDTH)
+        env_sprite_2:arcade.Sprite = EnvObject(SCREEN_WIDTH * 2)
+        self.scene.add_sprite(LAYER_OBJECTS, env_sprite_1)
+        self.scene.add_sprite(LAYER_OBJECTS, env_sprite_2)
 
         #adding middle sprites
         self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)
+
+        #adding two clouds for initialization
+        first_cloud:Cloud = Cloud()
+        second_cloud:Cloud = Cloud(SCREEN_WIDTH)
+        self.scene.add_sprite(LAYER_CLOUD, first_cloud)
+        self.scene.add_sprite(LAYER_CLOUD, second_cloud)
+
+        #initialize foliage
+        first_foliage:Foliage = Foliage()
+        second_foliage:Foliage = Foliage(SCREEN_WIDTH)
+        self.scene.add_sprite(LAYER_ENVIRONMENT, first_foliage)
+        self.scene.add_sprite(LAYER_ENVIRONMENT, second_foliage)
 
         self.generate_ceiling()
 
@@ -137,7 +180,7 @@ class GameView(arcade.View):
     def on_draw(self)->None:
         """Instructions to generate the layout of the window"""
         self.clear()
-        arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGTH, self.background)
+        arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
         self.scene.draw()
 
     def on_update(self, delta_time: float):
@@ -149,16 +192,29 @@ class GameView(arcade.View):
 
         self.process_key_change()
         self.protagonist.set_pos_left(CHARACTER_LEFT)
-        for i in self.scene[LAYER_PLATFORM]:
-            i.change_x=-GAME_SPEED
-            
-        if self.scene[LAYER_PLATFORM][0].right <= 0:
-            self.scene[LAYER_PLATFORM].pop(0)
 
+        #moving elements in the scene
+        self.move_and_pop(LAYER_PLATFORM, GAME_SPEED)
+        self.move_and_pop(LAYER_CLOUD, CLOUD_SPEED)
+        self.move_and_pop(LAYER_ENVIRONMENT, GAME_SPEED)
+        self.move_and_pop(LAYER_OBJECTS, GAME_SPEED)
+
+        #adding platforms 
         self.clear_extra_bullets()
 
         if (len(self.scene[LAYER_PLATFORM]) < SCREEN_WIDTH // PLATFORM_WIDTH + 2):
             self.generate_platform(int(self.scene[LAYER_PLATFORM][-1].right) + PLATFORM_WIDTH // 2 - GAME_SPEED)
+
+        #adding clouds, and foliage
+        self.add_layer_sprites(LAYER_CLOUD, 2, 1, SCREEN_WIDTH)
+        self.add_layer_sprites(LAYER_ENVIRONMENT, 2, 1, SCREEN_WIDTH)
+        self.add_layer_sprites(LAYER_OBJECTS, 2, 1, SCREEN_WIDTH)
+
+        #checking for collision with env objects
+        self.hit_list:list = arcade.check_for_collision_with_list(self.protagonist, self.scene[LAYER_OBJECTS])
+        if len(self.hit_list) > 0:
+            self.window.show_view(MainMenu())
+
 
     def generate_platform(self, start:int):
         """Generates the platform"""
@@ -168,6 +224,21 @@ class GameView(arcade.View):
                                                         center_y=PLATFORM_CENTER_Y)
             self.scene.add_sprite(LAYER_PLATFORM, middle_sprite)
 
+    def move_and_pop(self, layer:str, speed:int) -> None:
+        """Moves all the sprites in the layer and pops the ones that are out of the screen"""
+        for i in self.scene[layer]:
+            i.center_x = i.center_x-speed
+            
+        if self.scene[layer][0].right <= 0:
+            self.scene[layer].pop(0)
+
+    
+    def add_layer_sprites(self, layer:str, threshold:int, no_of_objects:int, start_position:int) -> None:
+        """Adds new items(with start_position) to the specified layer, if number of objects is less than threshold"""
+        if len(self.scene[layer]) < threshold:
+            for i in range(no_of_objects):
+                temp_sprite:arcade.Sprite = OBJECTS[layer](position=start_position)
+                self.scene.add_sprite(layer, temp_sprite)
     def generate_ceiling(self):
         """Generates the ceiling for the Game Window"""
         ceiling_sprite:arcade.Sprite = arcade.Sprite(center_x=SCREEN_WIDTH/10, center_y=SCREEN_HEIGTH)
@@ -218,7 +289,7 @@ def main()->None:
     """Main function for calling setup functions and running module"""
     reset_dir()
 
-    window:arcade.Window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGTH, SCREEN_TITLE)
+    window:arcade.Window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     window.center_window = True
     menu_view:MainMenu = MainMenu()
     window.show_view(menu_view)
