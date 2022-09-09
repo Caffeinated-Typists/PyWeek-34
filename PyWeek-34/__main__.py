@@ -16,7 +16,7 @@ SCREEN_TITLE:str = "PyWeek-34"
 TILE_SCALING:float = 0.5
 
 #Physics Constants
-GRAVITY:float = 0.65
+GRAVITY:float = 0.6
 GAME_SPEED:int = 10
 
 # Tile Constants
