@@ -1,14 +1,15 @@
-from turtle import position
 import typing
 import arcade
 import os
 import sys
+
 sys.path.append(os.getcwd() + r"\PyWeek-34")
+
 from characters.protagonist import Protagonist
 from clouds.clouds import Cloud
 from foliage.foliage import Foliage
 from env_objects.env_objects import EnvObject
-
+from characters.ufo import UFO
 
 
 #screen constants
@@ -38,7 +39,7 @@ CHARACTER_LEFT:int = 100
 CHARACTER_BOTTOM:int = PLATFORM_HEIGHT 
 
 # Game resources
-# platforms
+# platforms 
 CORNER_PIECE_LEFT:str = r"resources/Game Assets/deserttileset/png/Tile/1.png"
 MIDDLE_PIECE:str = r"resources/Game Assets/deserttileset/png/Tile/2.png"  
 CORNER_PIECE_RIGHT:str = r"resources/Game Assets/deserttileset/png/Tile/3.png"
@@ -54,6 +55,8 @@ LAYER_PROTAGONIST:str = "Protagonist"
 LAYER_CLOUD:str = "Clouds"
 LAYER_ENVIRONMENT:str = "Environment"
 LAYER_OBJECTS:str = "Objects"
+LAYER_BULLETS:str = "Bullets"
+LAYER_UFO:str = "UFO"
 LAYER_TEMP:str = "Temp"
 
 #set of objects to be used
@@ -61,8 +64,8 @@ OBJECTS:dict[str:typing.Optional] = {
     LAYER_CLOUD: Cloud, 
     LAYER_ENVIRONMENT: Foliage,
     LAYER_OBJECTS: EnvObject,
+    LAYER_UFO: UFO
     }
-LAYER_BULLETS:str = "Bullets"
 
 def reset_dir()->bool:
     """Resets the current working directory to file path of this file"""
@@ -117,16 +120,17 @@ class GameView(arcade.View):
         self.background = arcade.load_texture(BACKGROUND)
         
         self.scene = arcade.Scene()
+
         #adding the layers
         self.scene.add_sprite_list(LAYER_PLATFORM)
         self.scene.add_sprite_list(LAYER_CLOUD)
         self.scene.add_sprite_list(LAYER_ENVIRONMENT)
         self.scene.add_sprite_list(LAYER_TEMP)
         self.scene.add_sprite_list(LAYER_OBJECTS)
-
         self.scene.add_sprite_list(LAYER_CEILING)
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
         self.scene.add_sprite_list(LAYER_BULLETS)
+        self.scene.add_sprite_list(LAYER_UFO)
 
         self.scene[LAYER_CLOUD].alpha = 100
 
@@ -141,6 +145,10 @@ class GameView(arcade.View):
         corner_sprite_left.center_x = PLATFORM_CENTER_X
         corner_sprite_left.center_y = PLATFORM_CENTER_Y
         self.scene.add_sprite(LAYER_PLATFORM, corner_sprite_left)
+
+        #adding middle sprites
+        self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)
+
         
         # temp sprite
         # temp_sprite:arcade.Sprite = arcade.Sprite(r"C:\Users\aniru\Downloads\sketch1662664053401.png", 0.3)
@@ -149,25 +157,13 @@ class GameView(arcade.View):
         # self.scene.add_sprite(LAYER_ENVIRONMENT, temp_sprite)
 
         #environment sprites
-        env_sprite_1:arcade.Sprite = EnvObject(SCREEN_WIDTH)
-        env_sprite_2:arcade.Sprite = EnvObject(SCREEN_WIDTH * 2)
-        self.scene.add_sprite(LAYER_OBJECTS, env_sprite_1)
-        self.scene.add_sprite(LAYER_OBJECTS, env_sprite_2)
 
-        #adding middle sprites
-        self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)
 
-        #adding two clouds for initialization
-        first_cloud:Cloud = Cloud()
-        second_cloud:Cloud = Cloud(SCREEN_WIDTH)
-        self.scene.add_sprite(LAYER_CLOUD, first_cloud)
-        self.scene.add_sprite(LAYER_CLOUD, second_cloud)
-
-        #initialize foliage
-        first_foliage:Foliage = Foliage()
-        second_foliage:Foliage = Foliage(SCREEN_WIDTH)
-        self.scene.add_sprite(LAYER_ENVIRONMENT, first_foliage)
-        self.scene.add_sprite(LAYER_ENVIRONMENT, second_foliage)
+        #adding initial object into the layers
+        self.init_sprites(LAYER_CLOUD, 0, SCREEN_WIDTH, 2)
+        self.init_sprites(LAYER_ENVIRONMENT, 0, SCREEN_WIDTH, 2)
+        self.init_sprites(LAYER_OBJECTS, SCREEN_WIDTH, SCREEN_WIDTH * 2, 2)
+        self.init_sprites(LAYER_UFO, SCREEN_WIDTH, SCREEN_WIDTH * 2, 2)
 
         self.generate_ceiling()
 
@@ -198,6 +194,7 @@ class GameView(arcade.View):
         self.move_and_pop(LAYER_CLOUD, CLOUD_SPEED)
         self.move_and_pop(LAYER_ENVIRONMENT, GAME_SPEED)
         self.move_and_pop(LAYER_OBJECTS, GAME_SPEED)
+        self.move_and_pop(LAYER_UFO, GAME_SPEED)
 
         #adding platforms 
         self.clear_extra_bullets()
@@ -208,7 +205,8 @@ class GameView(arcade.View):
         #adding clouds, and foliage
         self.add_layer_sprites(LAYER_CLOUD, 2, 1, SCREEN_WIDTH)
         self.add_layer_sprites(LAYER_ENVIRONMENT, 2, 1, SCREEN_WIDTH)
-        self.add_layer_sprites(LAYER_OBJECTS, 2, 1, SCREEN_WIDTH)
+        self.add_layer_sprites(LAYER_OBJECTS, 2, 1, SCREEN_WIDTH * 2)
+        self.add_layer_sprites(LAYER_UFO, 2, 1, SCREEN_WIDTH)
 
         #checking for collision with env objects
         self.hit_list:list = arcade.check_for_collision_with_list(self.protagonist, self.scene[LAYER_OBJECTS])
@@ -231,6 +229,14 @@ class GameView(arcade.View):
             
         if self.scene[layer][0].right <= 0:
             self.scene[layer].pop(0)
+    
+    def init_sprites(self, layer:str, start:int, step:int, no_of_sprites:int):
+        """Initializes the sprites in the layer"""
+        curr:int = 0
+        while(curr < no_of_sprites):
+            sprite:arcade.Sprite = OBJECTS[layer](start + curr * step)
+            self.scene.add_sprite(layer, sprite)
+            curr += 1
 
     
     def add_layer_sprites(self, layer:str, threshold:int, no_of_objects:int, start_position:int) -> None:
