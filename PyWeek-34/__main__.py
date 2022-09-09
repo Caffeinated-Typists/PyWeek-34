@@ -188,7 +188,7 @@ class GameView(arcade.View):
         self.clear()
         arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
         self.scene.draw()
-        arcade.draw_text(f"TIME: {round(time() - START_TIME)}s", PLATFORM_HEIGHT/5, 50, arcade.csscolor.WHITE, 20)
+        arcade.draw_text(f"TIME: {round(time() - START_TIME)}s", PLATFORM_HEIGHT/10, PLATFORM_WIDTH/2, arcade.csscolor.WHITE, 15)
 
     def on_update(self, delta_time: float):
         """Specify the computations at each refresh"""
