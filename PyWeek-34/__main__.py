@@ -189,12 +189,12 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time: float):
         """Specify the computations at each refresh"""
+        self.process_key_change()
         self.physics_engine.update()
 
         self.scene.update_animation(delta_time, [LAYER_PROTAGONIST])
         self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS])
 
-        self.process_key_change()
         self.protagonist.set_pos_left(CHARACTER_LEFT)
 
         #moving elements in the scene
@@ -278,8 +278,6 @@ class GameView(arcade.View):
         if key == arcade.key.SPACE or key == arcade.key.UP:
             self.space_pressed = True
 
-        self.process_key_change()
-
     def on_key_release(self, key: int, modifiers: int):
         """Process when a key is released by the user"""
         
@@ -287,10 +285,8 @@ class GameView(arcade.View):
             self.shoot_pressed = False
             self.can_shoot = True
 
-        if key == arcade.key.SPACE or arcade.key.UP:
+        if key == arcade.key.SPACE or key == arcade.key.UP:
             self.space_pressed = False
-
-        self.process_key_change()
 
     def clear_extra_bullets(self) -> None:
         """Remove bullets which have left the screen out of Sprite list"""
