@@ -1,5 +1,7 @@
 import typing
 import arcade
+import arcade.gui
+import copy
 from time import time
 import os
 import sys
@@ -45,6 +47,8 @@ CHARACTER_BOTTOM:int = PLATFORM_HEIGHT
 CORNER_PIECE_LEFT:str = r"resources/Game Assets/deserttileset/png/Tile/1.png"
 MIDDLE_PIECE:str = r"resources/Game Assets/deserttileset/png/Tile/2.png"  
 CORNER_PIECE_RIGHT:str = r"resources/Game Assets/deserttileset/png/Tile/3.png"
+#font
+FONT:str = r"resources/Game Assets/GROBOLD.ttf"
 
 #background
 BACKGROUND:str = r"resources/Game Assets/deserttileset/png/BG.png"
@@ -81,21 +85,47 @@ class MainMenu(arcade.View):
         """Initializes the main menu"""
         super().__init__()
         self.background:arcade.Texture = arcade.load_texture(BACKGROUND)
+        self.manager:arcade.gui.UIManager = arcade.gui.UIManager()
+        self.manager.enable()
+        arcade.load_font(FONT)
+        start_style:dict[str:typing.Optional] = {
+            "font_color": arcade.color.UFO_GREEN,
+            "font_size": 40,
+            "font_name": "GROBOLD",
+            "bg_color": (15, 15, 15, 100),
+
+            "bg_color_hover": (30, 30, 30, 100),
+        }
+        
+        end_style:dict[str:typing.Optional] = copy.deepcopy(start_style)
+        end_style["font_color"] = arcade.color.OUTRAGEOUS_ORANGE
+        
+
+        start:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Start", x=SCREEN_WIDTH//3- 100, y=SCREEN_HEIGHT//3 - 50, width=200, height=100, style=start_style)
+        exit_game:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Exit", x= (2 * SCREEN_WIDTH//3) - 100, y=SCREEN_HEIGHT//3 - 50, width=200, height=100, style=end_style)
+        self.manager.add(start)
+        self.manager.add(exit_game)
 
     def on_show(self)->None:
         """Display window on function call"""
         arcade.set_background_color(arcade.color.RED_BROWN)
 
+
     def on_draw(self)->None:
         """Instructions for layout of window"""
         self.clear()
         arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
+        self.manager.draw()
 
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         """When mouse is clicked, start game"""
-        game_view:GameView = GameView()
-        self.window.show_view(game_view)
+        if (x > SCREEN_WIDTH//3 - 100 and x < SCREEN_WIDTH//3 + 100) and (y > SCREEN_HEIGHT//3 - 50 and y < SCREEN_HEIGHT//3 + 50):
+            game_view:GameView = GameView()
+            self.window.show_view(game_view)
+
+        elif (x > (2 * SCREEN_WIDTH//3) - 100 and x < (2 * SCREEN_WIDTH//3) + 100) and (y > SCREEN_HEIGHT//3 - 50 and y < SCREEN_HEIGHT//3 + 50):
+            arcade.close_window()
 
 class GameView(arcade.View):
     """Class for the handling all the game related functionality"""
