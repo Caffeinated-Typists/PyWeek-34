@@ -23,15 +23,15 @@ class Protagonist(arcade.Sprite):
     def __init__(self) -> None:
         """Initialize the character"""
         super().__init__(scale = PROTAGONIST_SCALING)
-        self.idle_texture:arcade.Texture = arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_standing_idle.png", x = 0, y = 0, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) 
-        self.flying_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_flying_no_movement.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(10)]
-        self.with_gun_flying_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_with_weapon_standing_shoot.png")]
-        self.shooting_flying_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_with_weapon_standing_shoot.png")]
-        self.falling_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_standing_idle.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
-        self.with_gun_falling_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_standing_run.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
-        self.shooting_falling_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_standing_run.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
-        self.running_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_standing_run.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
-        self.walking_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\spritesheets\__jet_pack_man_no_weapon_white_helmet_standing_walk.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
+        self.idle_texture:arcade.Texture = arcade.load_texture("characters\jetpack character\__jet_pack_man_no_weapon_white_helmet_standing_idle.png", x = 0, y = 0, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) 
+        self.flying_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\__jet_pack_man_no_weapon_white_helmet_flying_.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
+        self.with_gun_flying_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\__jet_pack_man_with_weapon_flying.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
+        self.shooting_flying_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\__jet_pack_man_with_weapon_flying_shoot.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
+        self.falling_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\__jet_pack_man_no_weapon_white_helmet_standing_idle.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
+        self.with_gun_falling_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\__jet_pack_man_with_weapon_standing_idle.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
+        self.shooting_falling_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\__jet_pack_man_with_weapon_standing_shoot.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(5)]
+        self.running_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\__jet_pack_man_no_weapon_white_helmet_standing_run.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
+        self.walking_textures:list[arcade.Texture] = [arcade.load_texture("characters\jetpack character\__jet_pack_man_no_weapon_white_helmet_standing_walk.png", x = i%5 * IMAGE_PIXEL_WIDTH, y = i//5 * IMAGE_PIXEL_HEIGHT, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) for i in range(15)]
         self.dying_flying_textures:list[arcade.Texture] = None
         self.dying_walking_textures:list[arcade.Texture] = None
         self.texture:arcade.Texture = self.idle_texture
@@ -48,9 +48,9 @@ class Protagonist(arcade.Sprite):
         self.horizontal_vel:int = PROTAGONIST_SPEED
         self.jump_vel:int = PROTAGONIST_JUMP_SPEED
         self.jetpack_accln:int = PROTAGONIST_JETPACK_ACCLRN
-        self.set_hit_box([[-33, 240], [33, -240]])
+        self.set_hit_box([[-55, 240], [55, -240]])
 
-        # self.start_shooting()
+        self.start_shooting()
         
     def set_pos_x(self, x:int) -> None:
         """Set the x coordinate of the player"""
@@ -99,6 +99,7 @@ class Protagonist(arcade.Sprite):
     def start_shooting(self) -> None:
         """Protagonist can now use his gun while flying"""
         self.can_shoot = True
+        self.is_shooting = True
 
     def fly(self) -> None:
         """Update the y-velocity for jumping"""
@@ -133,13 +134,17 @@ class Protagonist(arcade.Sprite):
             self.is_on_ground = True
 
         if self.is_flying:
-            if self.can_shoot:
+            if self.is_shooting:
                 self.textures = self.shooting_flying_textures
+            elif self.can_shoot:
+                self.textures = self.with_gun_flying_textures
             else:
                 self.textures = self.flying_textures
         elif self.is_falling:
-            if self.can_shoot:
+            if self.is_shooting:
                 self.textures = self.shooting_falling_textures
+            elif self.can_shoot:
+                self.textures = self.with_gun_falling_textures
             else:
                 self.textures = self.falling_textures
         elif self.is_running:

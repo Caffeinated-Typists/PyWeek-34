@@ -1,6 +1,6 @@
-from turtle import position
 import typing
 import arcade
+from time import time
 import os
 import sys
 sys.path.append(os.getcwd() + r"\PyWeek-34")
@@ -16,7 +16,8 @@ SCREEN_WIDTH:int = 1000
 SCREEN_HEIGHT:int = 480
 SCREEN_TITLE:str = "PyWeek-34"
 
-
+#Time constants
+START_TIME:time = None
  
 #scaling constants
 TILE_SCALING:float = 0.5
@@ -110,6 +111,8 @@ class GameView(arcade.View):
 
         self.protagonist:arcade.Sprite = None
 
+        self.score = 0
+
         self.physics_engine:arcade.PhysicsEnginePlatformer = None
 
     def setup(self)->None:
@@ -173,6 +176,9 @@ class GameView(arcade.View):
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, platforms=self.scene[LAYER_PLATFORM], walls=self.scene[LAYER_CEILING]) 
 
+        global START_TIME
+        START_TIME = time()
+
     def on_show_view(self)->None:
         """Display window on function call"""
         self.setup()
@@ -182,6 +188,7 @@ class GameView(arcade.View):
         self.clear()
         arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
         self.scene.draw()
+        arcade.draw_text(f"TIME: {round(time() - START_TIME)}s", PLATFORM_HEIGHT/5, 50, arcade.csscolor.WHITE, 20)
 
     def on_update(self, delta_time: float):
         """Specify the computations at each refresh"""
@@ -261,7 +268,7 @@ class GameView(arcade.View):
         if key == arcade.key.Q:
             self.shoot_pressed = True
 
-        if key == arcade.key.SPACE:
+        if key == arcade.key.SPACE or key == arcade.key.UP:
             self.space_pressed = True
 
         self.process_key_change()
@@ -273,7 +280,7 @@ class GameView(arcade.View):
             self.shoot_pressed = False
             self.can_shoot = True
 
-        if key == arcade.key.SPACE:
+        if key == arcade.key.SPACE or arcade.key.UP:
             self.space_pressed = False
 
         self.process_key_change()
