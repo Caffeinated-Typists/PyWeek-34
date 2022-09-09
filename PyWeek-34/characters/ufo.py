@@ -1,32 +1,25 @@
+import sys, os
 import math
 import random
 import typing
 import arcade
+sys.path.append(os.getcwd() + r"\PyWeek-34")
+from characters.enemy import Enemy
 
-# Constants
+# UFO Constants
 UFO_SCALING:float = 1
-SCREEN_WIDTH:int = 1000
-SCREEN_HEIGHT:int = 480
+UFO_HITPOINTS:int = 500
 
-
-class UFO(arcade.Sprite):
+class UFO(Enemy):
 
     def __init__(self, position: int = 0) -> None:
-        super().__init__(scale=UFO_SCALING)
+        super().__init__(hitpoints=UFO_HITPOINTS, scale=UFO_SCALING)
         self.randomize_all(position)    
 
     def randomize_image(self) -> None:
         """Randomizes the image of the cloud"""
         ufo_path = f"characters/UFO Sprites/ufo{random.randint(1, 4)}.png"
         self.texture = arcade.load_texture(ufo_path)
-    
-    def randomize_x(self, position:int = 0) -> None:
-        """Randomizes the x position of the cloud"""
-        self.center_x = random.randint(position + SCREEN_WIDTH // 3, position + 2 * SCREEN_WIDTH//3)
-
-    def randomize_y(self) -> None:
-        """Randomizes the y position of the cloud"""
-        self.center_y = random.randint(2 * (SCREEN_HEIGHT // 3), SCREEN_HEIGHT - 100)
 
     def randomize_all(self, position:int = 0) -> None:
         """Randomizes the image, x and y position of the cloud"""

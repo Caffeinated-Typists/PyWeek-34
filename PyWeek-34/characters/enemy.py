@@ -1,12 +1,17 @@
 import arcade
 import typing
+import random
+
+#SCREEN CONSTANTS
+SCREEN_WIDTH:int = 1000
+SCREEN_HEIGHT:int = 480
 
 class Enemy(arcade.Sprite):
 
-    def __init__(self, scale) -> None:
+    def __init__(self, hitpoints:int, scale:int = 1) -> None:
         """Initialize the enemy class"""
         super().__init__(scale = scale)
-        self.hitpoints:int
+        self.hitpoints:int = hitpoints
         self.cur_texture:int = 0
         
     def set_pos_x(self, x:int) -> None:
@@ -34,6 +39,14 @@ class Enemy(arcade.Sprite):
         """Set the velocity of Sprite"""
         self.set_vel_x(x)
         self.set_vel_y(y)
+
+    def randomize_x(self, position:int = 0) -> None:
+        """Randomizes the x position of the cloud"""
+        self.center_x = random.randint(position + SCREEN_WIDTH // 3, position + 2 * SCREEN_WIDTH//3)
+
+    def randomize_y(self) -> None:
+        """Randomizes the y position of the cloud"""
+        self.center_y = random.randint(2 * (SCREEN_HEIGHT // 3), SCREEN_HEIGHT - 100)
 
     def update_bullet_damage(self, damage:int) -> bool:
         """Update the hitpoints of Sprite after being hit by a bullet, returns True if the enemy dies"""
