@@ -1,6 +1,4 @@
-from enum import Flag
 import typing
-from unittest.mock import NonCallableMagicMock
 import arcade
 
 #Constants for Protagonist
@@ -11,8 +9,11 @@ PROTAGONIST_JETPACK_ACCLRN:int = 1
 
 #Constants for bullets
 LAYER_BULLETS:str = "Bullets"
+BULLET_SCALE:float = 0.8
 BULLET_SPEED:int = 10
 BULLET_DAMAGE:int = 100
+BULLET_MARGIN_X:int = 70
+BULLET_MARGIN_Y:int = 5
 
 #Constants for getting Images from Sprite List
 IMAGE_PIXEL_HEIGHT:int = 599
@@ -39,11 +40,7 @@ class Protagonist(arcade.Sprite):
         self.dying_flying_textures:list[arcade.Texture] = None
         self.dying_walking_textures:list[arcade.Texture] = None
         self.texture:arcade.Texture = self.idle_texture
-        self.textures:list[arcade.Texture] = None
-
-        
-        
-        
+        self.textures:list[arcade.Texture] = None      
 
         self.is_flying:bool = False
         self.is_falling:bool = False
@@ -107,7 +104,6 @@ class Protagonist(arcade.Sprite):
     def start_shooting(self) -> None:
         """Protagonist can now use his gun while flying"""
         self.can_shoot = True
-        self.is_shooting = True
 
     def fly(self) -> None:
         """Update the y-velocity for jumping"""
@@ -119,11 +115,12 @@ class Protagonist(arcade.Sprite):
             return
         if self.is_on_ground:             #Can't shoot bullets on ground
             return
-        bullet:arcade.Sprite = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png")
-        bullet.center_x = self.center_x
-        bullet.center_y = self.center_y
+        bullet:arcade.Sprite = arcade.Sprite("characters\jetpack character\laserRed16.png", BULLET_SCALE)
+        bullet.center_x = self.center_x + BULLET_MARGIN_X
+        bullet.center_y = self.center_y + BULLET_MARGIN_Y
         bullet.change_x = BULLET_SPEED
         scene.add_sprite(LAYER_BULLETS, bullet)
+        self.is_shooting = True
 
     def animate_shooting(self) -> None:
         """Helper function to animate the object while shooting"""
