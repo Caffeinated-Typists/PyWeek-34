@@ -16,11 +16,13 @@ SCREEN_WIDTH:int = 1000
 SCREEN_HEIGHT:int = 480
 SCREEN_TITLE:str = "PyWeek-34"
 
+
+ 
 #scaling constants
 TILE_SCALING:float = 0.5
 
 #Physics Constants
-GRAVITY:float = 1
+GRAVITY:float = 0.6
 GAME_SPEED:int = 8
 CLOUD_SPEED:float = 0.1 * GAME_SPEED
 
@@ -47,6 +49,7 @@ BACKGROUND:str = r"resources/Game Assets/deserttileset/png/BG.png"
 
 #map constants
 LAYER_PLATFORM:str = "Platform"
+LAYER_CEILING:str = "Ceiling"
 LAYER_PROTAGONIST:str = "Protagonist"
 LAYER_CLOUD:str = "Clouds"
 LAYER_ENVIRONMENT:str = "Environment"
@@ -59,6 +62,7 @@ OBJECTS:dict[str:typing.Optional] = {
     LAYER_ENVIRONMENT: Foliage,
     LAYER_OBJECTS: EnvObject,
     }
+LAYER_BULLETS:str = "Bullets"
 
 def reset_dir()->bool:
     """Resets the current working directory to file path of this file"""
@@ -100,9 +104,9 @@ class GameView(arcade.View):
         self.scene:arcade.Scene = None
         self.background:arcade.Texture = None
 
-        self.left_pressed:bool = False
-        self.right_pressed:bool = False
-        self.up_pressed:bool = False
+        self.space_pressed:bool = False
+        self.shoot_pressed:bool = False
+        self.can_shoot:bool = True
 
         self.protagonist:arcade.Sprite = None
 
@@ -118,9 +122,11 @@ class GameView(arcade.View):
         self.scene.add_sprite_list(LAYER_CLOUD)
         self.scene.add_sprite_list(LAYER_ENVIRONMENT)
         self.scene.add_sprite_list(LAYER_TEMP)
-        self.scene.add_sprite_list(LAYER_PROTAGONIST)
         self.scene.add_sprite_list(LAYER_OBJECTS)
 
+        self.scene.add_sprite_list(LAYER_CEILING)
+        self.scene.add_sprite_list(LAYER_PROTAGONIST)
+        self.scene.add_sprite_list(LAYER_BULLETS)
 
         self.scene[LAYER_CLOUD].alpha = 100
 
@@ -163,7 +169,9 @@ class GameView(arcade.View):
         self.scene.add_sprite(LAYER_ENVIRONMENT, first_foliage)
         self.scene.add_sprite(LAYER_ENVIRONMENT, second_foliage)
 
-        self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, platforms=self.scene["Platform"]) 
+        self.generate_ceiling()
+
+        self.physics_engine = arcade.PhysicsEnginePlatformer(self.protagonist, gravity_constant = GRAVITY, platforms=self.scene[LAYER_PLATFORM], walls=self.scene[LAYER_CEILING]) 
 
     def on_show_view(self)->None:
         """Display window on function call"""
@@ -180,6 +188,7 @@ class GameView(arcade.View):
         self.physics_engine.update()
 
         self.scene.update_animation(delta_time, [LAYER_PROTAGONIST])
+        self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS])
 
         self.process_key_change()
         self.protagonist.set_pos_left(CHARACTER_LEFT)
@@ -191,6 +200,8 @@ class GameView(arcade.View):
         self.move_and_pop(LAYER_OBJECTS, GAME_SPEED)
 
         #adding platforms 
+        self.clear_extra_bullets()
+
         if (len(self.scene[LAYER_PLATFORM]) < SCREEN_WIDTH // PLATFORM_WIDTH + 2):
             self.generate_platform(int(self.scene[LAYER_PLATFORM][-1].right) + PLATFORM_WIDTH // 2 - GAME_SPEED)
 
@@ -228,44 +239,51 @@ class GameView(arcade.View):
             for i in range(no_of_objects):
                 temp_sprite:arcade.Sprite = OBJECTS[layer](position=start_position)
                 self.scene.add_sprite(layer, temp_sprite)
+    def generate_ceiling(self):
+        """Generates the ceiling for the Game Window"""
+        ceiling_sprite:arcade.Sprite = arcade.Sprite(center_x=SCREEN_WIDTH/10, center_y=SCREEN_HEIGTH)
+        ceiling_sprite.set_hit_box([[-SCREEN_WIDTH/10, -20], [SCREEN_WIDTH/5, 0]])
+        self.scene.add_sprite(LAYER_CEILING, ceiling_sprite)
 
     def process_key_change(self) -> None:
         """Called after any recorded change in key to update the local variables appropriately"""
 
-        if self.left_pressed and not self.right_pressed:
-            self.protagonist.go_left()
-        elif self.right_pressed and not self.left_pressed:
-            self.protagonist.go_right()
-        else:
-            self.protagonist.stationary_x()
+        if self.space_pressed:
+            self.protagonist.fly()
 
-        if self.up_pressed and self.physics_engine.can_jump():
-            self.protagonist.jump()
+        if self.shoot_pressed and self.can_shoot:
+            self.protagonist.shoot(self.scene)
+            self.can_shoot = False
 
     def on_key_press(self, key: int, modifiers: int)->None:
         """Function to process the key presses of the user"""
 
-        if key == arcade.key.LEFT or key == arcade.key.A:
-            self.left_pressed = True
-        if key == arcade.key.RIGHT or key == arcade.key.D:
-            self.right_pressed = True
-        if key == arcade.key.UP or key == arcade.key.W:
-            self.up_pressed = True
+        if key == arcade.key.Q:
+            self.shoot_pressed = True
+
+        if key == arcade.key.SPACE:
+            self.space_pressed = True
 
         self.process_key_change()
 
     def on_key_release(self, key: int, modifiers: int):
         """Process when a key is released by the user"""
+        
+        if key == arcade.key.Q:
+            self.shoot_pressed = False
+            self.can_shoot = True
 
-        if key == arcade.key.LEFT or key == arcade.key.A:
-            self.left_pressed = False
-        if key == arcade.key.RIGHT or key == arcade.key.D:
-            self.right_pressed = False
-        if key == arcade.key.UP or key == arcade.key.W:
-            self.up_pressed = False
+        if key == arcade.key.SPACE:
+            self.space_pressed = False
 
         self.process_key_change()
 
+    def clear_extra_bullets(self) -> None:
+        """Remove bullets which have left the screen out of Sprite list"""
+
+        for bullet in self.scene[LAYER_BULLETS]:
+            if bullet.left > SCREEN_WIDTH:
+                bullet.remove_from_sprite_lists()
 
 def main()->None:
     """Main function for calling setup functions and running module"""
