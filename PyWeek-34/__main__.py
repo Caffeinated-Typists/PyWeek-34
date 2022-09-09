@@ -121,6 +121,7 @@ class GameView(arcade.View):
         self.scene.add_sprite_list(LAYER_ENVIRONMENT)
         self.scene.add_sprite_list(LAYER_TEMP)
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
+        self.scene.add_sprite_list(LAYER_OBJECTS)
 
 
         self.scene[LAYER_CLOUD].alpha = 100
@@ -142,9 +143,12 @@ class GameView(arcade.View):
         # temp_sprite.center_x = 700
         # temp_sprite.center_y = PLATFORM_CENTER_Y + 100
         # self.scene.add_sprite(LAYER_ENVIRONMENT, temp_sprite)
+
         #environment sprites
-        env_sprite:arcade.Sprite = EnvObject()
-        self.scene.add_sprite(LAYER_ENVIRONMENT, env_sprite)
+        env_sprite_1:arcade.Sprite = EnvObject(SCREEN_WIDTH)
+        env_sprite_2:arcade.Sprite = EnvObject(SCREEN_WIDTH * 2)
+        self.scene.add_sprite(LAYER_OBJECTS, env_sprite_1)
+        self.scene.add_sprite(LAYER_OBJECTS, env_sprite_2)
 
         #adding middle sprites
         self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)
@@ -186,6 +190,7 @@ class GameView(arcade.View):
         self.move_and_pop(LAYER_PLATFORM, GAME_SPEED)
         self.move_and_pop(LAYER_CLOUD, CLOUD_SPEED)
         self.move_and_pop(LAYER_ENVIRONMENT, GAME_SPEED)
+        self.move_and_pop(LAYER_OBJECTS, GAME_SPEED)
 
         #adding platforms 
         if (len(self.scene[LAYER_PLATFORM]) < SCREEN_WIDTH // PLATFORM_WIDTH + 2):
@@ -194,6 +199,12 @@ class GameView(arcade.View):
         #adding clouds, and foliage
         self.add_layer_sprites(LAYER_CLOUD, 2, 1, SCREEN_WIDTH)
         self.add_layer_sprites(LAYER_ENVIRONMENT, 2, 1, SCREEN_WIDTH)
+        self.add_layer_sprites(LAYER_OBJECTS, 2, 1, SCREEN_WIDTH)
+
+        #checking for collision with env objects
+        self.hit_list:list = arcade.check_for_collision_with_list(self.protagonist, self.scene[LAYER_OBJECTS])
+        if len(self.hit_list) > 0:
+            self.window.show_view(MainMenu())
 
 
     def generate_platform(self, start:int):
