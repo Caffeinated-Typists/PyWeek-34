@@ -221,6 +221,15 @@ class GameView(arcade.View):
         if len(self.hit_list) > 0:
             self.window.show_view(MainMenu())
 
+        #checking for collisions with bullets
+        for ufo in self.scene[LAYER_UFO]:
+            hit_list = arcade.check_for_collision_with_list(ufo, self.scene[LAYER_BULLETS])
+            if len(hit_list) > 0:
+                #Update bullet damage to ufo
+                pass
+            for bullet in hit_list:
+                bullet.remove_from_sprite_lists()
+
 
     def generate_platform(self, start:int):
         """Generates the platform"""
