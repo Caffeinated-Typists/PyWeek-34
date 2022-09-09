@@ -53,13 +53,6 @@ LAYER_ENVIRONMENT:str = "Environment"
 LAYER_OBJECTS:str = "Objects"
 LAYER_TEMP:str = "Temp"
 
-LAYER_OPTIONS:dict[str:dict[str:typing.Optional]] = {
-    LAYER_PLATFORM : {
-        "use_spatial_hash": False, 
-        "sprite_scaling": TILE_SCALING},
-}
-
-
 #set of objects to be used
 OBJECTS:dict[str:typing.Optional] = {
     LAYER_CLOUD: Cloud, 
@@ -75,6 +68,11 @@ def reset_dir()->bool:
 
 class MainMenu(arcade.View):
 
+    def __init__(self):
+        """Initializes the main menu"""
+        super().__init__()
+        self.background:arcade.Texture = arcade.load_texture(BACKGROUND)
+
     def on_show(self)->None:
         """Display window on function call"""
         arcade.set_background_color(arcade.color.RED_BROWN)
@@ -82,6 +80,8 @@ class MainMenu(arcade.View):
     def on_draw(self)->None:
         """Instructions for layout of window"""
         self.clear()
+        arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
+
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         """When mouse is clicked, start game"""
@@ -98,7 +98,6 @@ class GameView(arcade.View):
         arcade.set_background_color(arcade.color.RED_BROWN)
 
         self.scene:arcade.Scene = None
-        self.tile_map:arcade.tilemap.TileMap = None
         self.background:arcade.Texture = None
 
         self.left_pressed:bool = False
@@ -111,7 +110,6 @@ class GameView(arcade.View):
 
     def setup(self)->None:
         """Setup all the variables and maps here"""
-        # map_file:str = "PyWeek-34/resources/Game Maps/main.json"
         self.background = arcade.load_texture(BACKGROUND)
         
         self.scene = arcade.Scene()
