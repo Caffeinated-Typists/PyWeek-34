@@ -12,7 +12,7 @@ SCREEN_HEIGHT:int = 480
 class UFO(arcade.Sprite):
 
     def __init__(self, position: int = 0) -> None:
-        super().__init__(filename="characters/UFO Sprites/ufo1.png", scale=UFO_SCALING)
+        super().__init__(scale=UFO_SCALING)
         self.randomize_all(position)    
 
     def randomize_image(self) -> None:
