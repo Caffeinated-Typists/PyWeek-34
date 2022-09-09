@@ -241,7 +241,7 @@ class GameView(arcade.View):
                 self.scene.add_sprite(layer, temp_sprite)
     def generate_ceiling(self):
         """Generates the ceiling for the Game Window"""
-        ceiling_sprite:arcade.Sprite = arcade.Sprite(center_x=SCREEN_WIDTH/10, center_y=SCREEN_HEIGTH)
+        ceiling_sprite:arcade.Sprite = arcade.Sprite(center_x=SCREEN_WIDTH/10, center_y=SCREEN_HEIGHT)
         ceiling_sprite.set_hit_box([[-SCREEN_WIDTH/10, -20], [SCREEN_WIDTH/5, 0]])
         self.scene.add_sprite(LAYER_CEILING, ceiling_sprite)
 
