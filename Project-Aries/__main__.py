@@ -18,7 +18,7 @@ from characters.ufo import UFO
 #screen constants
 SCREEN_WIDTH:int = 1000
 SCREEN_HEIGHT:int = 480
-SCREEN_TITLE:str = "PyWeek-34"
+SCREEN_TITLE:str = "Project Aries"
 
 #Time constants
 START_TIME:time = None
@@ -52,6 +52,10 @@ MIDDLE_PIECE:str = r"resources/Game Assets/deserttileset/png/Tile/2.png"
 CORNER_PIECE_RIGHT:str = r"resources/Game Assets/deserttileset/png/Tile/3.png"
 #font
 FONT:str = r"resources/Game Assets/GROBOLD.ttf"
+#background music
+BACKGROUND_MUSIC:str = r"resources/Game Assets/Sounds/background-loop-melodic-techno.mp3"
+END_SOUND:str = r"resources/Game Assets/Sounds/boxopen.ogg"
+UFO_HIT_SOUND = r"characters/UFO Sprites/Bullet Impact 21.wav"
 
 #background
 BACKGROUND:str = r"resources/Game Assets/deserttileset/png/BG.png"
@@ -84,13 +88,20 @@ def reset_dir()->bool:
 
 class MainMenu(arcade.View):
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes the main menu"""
         super().__init__()
-        self.background:arcade.Texture = arcade.load_texture(BACKGROUND)
-        self.manager:arcade.gui.UIManager = arcade.gui.UIManager()
-        self.manager.enable()
+        self.manager:arcade.gui.UIManager = None
+        self.background:arcade.Texture = None
         arcade.load_font(FONT)
+        self.setup()
+
+    
+    def setup(self) -> None:
+        self.background = arcade.load_texture(BACKGROUND)
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+
         start_style:dict[str:typing.Optional] = {
             "font_color": arcade.color.UFO_GREEN,
             "font_size": 40,
@@ -104,10 +115,12 @@ class MainMenu(arcade.View):
         end_style["font_color"] = arcade.color.OUTRAGEOUS_ORANGE
         
 
-        start:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Start", x=SCREEN_WIDTH//3- 100, y=SCREEN_HEIGHT//3 - 50, width=200, height=100, style=start_style)
-        exit_game:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Exit", x= (2 * SCREEN_WIDTH//3) - 100, y=SCREEN_HEIGHT//3 - 50, width=200, height=100, style=end_style)
+        start:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Start", x=SCREEN_WIDTH//3- 100, y=SCREEN_HEIGHT//4 - 50, width=200, height=100, style=start_style)
+        exit_game:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Exit", x= (2 * SCREEN_WIDTH//3) - 100, y=SCREEN_HEIGHT//4 - 50, width=200, height=100, style=end_style)
         self.manager.add(start)
         self.manager.add(exit_game)
+
+        self.title:arcade.Text = arcade.Text("Project: Aries", SCREEN_WIDTH//2, 2 * SCREEN_HEIGHT//3, arcade.color.WHITE, 65, width=100, font_name="consolas", align="left", anchor_x="center", anchor_y="center")
 
     def on_show(self)->None:
         """Display window on function call"""
@@ -119,15 +132,16 @@ class MainMenu(arcade.View):
         self.clear()
         arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
         self.manager.draw()
+        self.title.draw()
 
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         """When mouse is clicked, start game"""
-        if (x > SCREEN_WIDTH//3 - 100 and x < SCREEN_WIDTH//3 + 100) and (y > SCREEN_HEIGHT//3 - 50 and y < SCREEN_HEIGHT//3 + 50):
+        if (x > SCREEN_WIDTH//3 - 100 and x < SCREEN_WIDTH//3 + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
             game_view:GameView = GameView()
             self.window.show_view(game_view)
 
-        elif (x > (2 * SCREEN_WIDTH//3) - 100 and x < (2 * SCREEN_WIDTH//3) + 100) and (y > SCREEN_HEIGHT//3 - 50 and y < SCREEN_HEIGHT//3 + 50):
+        elif (x > (2 * SCREEN_WIDTH//3) - 100 and x < (2 * SCREEN_WIDTH//3) + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
             arcade.close_window()
 
 class GameView(arcade.View):
@@ -170,6 +184,11 @@ class GameView(arcade.View):
         self.scene.add_sprite_list(LAYER_UFO)
 
         self.scene[LAYER_CLOUD].alpha = 100
+        #playing audio
+        self.bg_player = arcade.play_sound(arcade.load_sound(BACKGROUND_MUSIC), looping=True)
+        self.end_game = arcade.load_sound(END_SOUND)
+        self.ufo_hit = arcade.load_sound(UFO_HIT_SOUND)
+
 
         #creating the protagonist
         self.protagonist = Protagonist()
@@ -254,6 +273,7 @@ class GameView(arcade.View):
             hit_list = arcade.check_for_collision_with_list(ufo, self.scene[LAYER_BULLETS])
             if len(hit_list) > 0:
                 if ufo.update_bullet_damage(BULLET_DAMAGE):
+                    arcade.play_sound(self.ufo_hit, volume=0.2)
                     ufo.play_dead_animation(self.scene)
                     ufo.remove_from_sprite_lists()
             for bullet in hit_list:
@@ -262,6 +282,10 @@ class GameView(arcade.View):
         #checking for collision with env objects
         self.hit_list:list = arcade.check_for_collision_with_lists(self.protagonist, [self.scene[LAYER_OBJECTS], self.scene[LAYER_UFO]])
         if len(self.hit_list) > 0:
+            arcade.stop_sound(self.bg_player)
+            arcade.play_sound(self.end_game)
+            if self.protagonist.sound_player_flying: self.protagonist.sound_player_flying.pause()
+            if self.protagonist.sound_player_ground: self.protagonist.sound_player_ground.pause()
             self.window.show_view(MainMenu())
 
     def generate_platform(self, start:int):

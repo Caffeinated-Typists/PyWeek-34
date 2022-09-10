@@ -21,6 +21,14 @@ IMAGE_PIXEL_WIDTH:int = 692
 FLYING_IMAGE_PIXEL_WIDTH:int = 881
 FLYING_IMAGE_PIXEL_HEIGHT:int = 639
 
+#sounds
+SOUND_WALKING:str = r"characters/jetpack character/sounds/steps_platform.ogg"
+SOUND_FLYING_START:str = r"characters/jetpack character/sounds/start.ogg"
+SOUND_FLYING_MAIN:str = r"characters/jetpack character/sounds/main.ogg"
+SOUND_FLYING_END:str = r"characters/jetpack character/sounds/ending.ogg"
+PEW:str = r"characters/jetpack character/sounds/pew.wav"
+
+
 
 class Protagonist(arcade.Sprite):
 
@@ -55,6 +63,15 @@ class Protagonist(arcade.Sprite):
         self.jetpack_accln:int = PROTAGONIST_JETPACK_ACCLRN
         self.set_hit_box([[-55, 240], [55, -240]])
 
+        self.walking_sound = arcade.load_sound(SOUND_WALKING)
+        self.flying_start_sound = arcade.load_sound(SOUND_FLYING_START)
+        self.flying_main_sound = arcade.load_sound(SOUND_FLYING_MAIN)
+        self.flying_end_sound = arcade.load_sound(SOUND_FLYING_END)
+        self.pew = arcade.load_sound(PEW)
+
+
+        self.sound_player_ground = None
+        self.sound_player_flying = None
         self.start_shooting()
         
     def set_pos_x(self, x:int) -> None:
@@ -121,6 +138,9 @@ class Protagonist(arcade.Sprite):
         bullet.change_x = BULLET_SPEED
         scene.add_sprite(LAYER_BULLETS, bullet)
         self.is_shooting = True
+        arcade.play_sound(self.pew, volume=0.3)
+
+
 
     def animate_shooting(self) -> None:
         """Helper function to animate the object while shooting"""
@@ -139,8 +159,10 @@ class Protagonist(arcade.Sprite):
 
     def update_animation(self, delta_time: float) -> None:
         """Update the animation of the Protagonist at every call"""
+        initial_state:list[bool] = [self.is_flying, self.is_falling, self.is_on_ground]
 
         if (self.change_y > 0) or (self.change_y > -0.5 and self.center_y > 400):
+            # inset flying sound here
             self.is_flying = True
             self.is_falling = False
             self.is_on_ground = False
@@ -152,6 +174,23 @@ class Protagonist(arcade.Sprite):
             self.is_flying = False
             self.is_falling = False
             self.is_on_ground = True
+
+        final_state:list[bool] = [self.is_flying, self.is_falling, self.is_on_ground]
+        
+        if  (not initial_state[2]) and (final_state[2]):
+            self.sound_player_ground = self.walking_sound.play(loop=True, volume=0.5)
+        elif (not final_state[2]) and (initial_state[2]):
+            if self.sound_player_ground:
+                self.sound_player_ground.pause()
+        
+        if (not initial_state[0]) and (final_state[0]):
+            self.flying_start_sound.play(volume=0.5)
+            self.sound_player_flying = self.flying_main_sound.play(loop=True, volume=0.5)
+
+        elif (not final_state[0]) and (initial_state[0]):
+            self.flying_end_sound.play(volume=0.5)
+            if self.sound_player_flying:
+                self.sound_player_flying.pause()
 
         if self.is_flying:
             if self.is_shooting:
@@ -179,6 +218,7 @@ class Protagonist(arcade.Sprite):
         else:
             self.textures = self.walking_textures
             self.animate()
+        
 
     def add_animation(self, spriteSheet:str, count:int) -> list[arcade.Texture]:
         """Add animation sprites to the protagonist"""
@@ -190,4 +230,6 @@ class Protagonist(arcade.Sprite):
             rval.append(texture)
         
         return rval
+    
+    
         
