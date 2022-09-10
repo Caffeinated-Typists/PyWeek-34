@@ -23,7 +23,7 @@ class UFO(Enemy):
         """Randomizes the image of the cloud"""
         idx:int = random.randint(0, 4)
         self.texture = arcade.load_texture(f"characters/UFO Sprites/ship_{idx}.png")
-        # self.death_textures = self.cur_textures[1]
+        self.death_textures = [arcade.load_texture(f"characters/UFO Sprites/ship_damage_{idx}.png"), arcade.load_texture(f"characters/UFO Sprites/laser_burst_{idx}.png")]
 
     def randomize_all(self, position:int = 0) -> None:
         """Randomizes the image, x and y position of the cloud"""

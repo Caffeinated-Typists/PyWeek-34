@@ -218,7 +218,7 @@ class GameView(arcade.View):
         self.process_key_change()
         self.physics_engine.update()
 
-        self.scene.update_animation(delta_time, [LAYER_PROTAGONIST])
+        self.scene.update_animation(delta_time, [LAYER_PROTAGONIST, LAYER_DEATH])
         self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS])
 
         self.protagonist.set_pos_x(CHARACTER_BOTTOM + self.protagonist.width // 2)
@@ -229,6 +229,7 @@ class GameView(arcade.View):
         self.move_and_pop(LAYER_FOLIAGE, GAME_SPEED)
         self.move_and_pop(LAYER_OBJECTS, GAME_SPEED)
         self.move_and_pop(LAYER_UFO, GAME_SPEED)
+        self.move_and_pop(LAYER_DEATH, GAME_SPEED)
 
         #adding platforms 
         self.clear_extra_bullets()
@@ -267,6 +268,9 @@ class GameView(arcade.View):
 
     def move_and_pop(self, layer:str, speed:int) -> None:
         """Moves all the sprites in the layer and pops the ones that are out of the screen"""
+        if len(self.scene[layer]) == 0:
+            return
+
         for i in self.scene[layer]:
             i.center_x = i.center_x-speed
             
@@ -288,7 +292,7 @@ class GameView(arcade.View):
             for i in range(no_of_objects):
                 temp_sprite:arcade.Sprite = OBJECTS[layer](position=start_position)
                 self.scene.add_sprite(layer, temp_sprite)
-                
+
     def generate_ceiling(self):
         """Generates the ceiling for the Game Window"""
         ceiling_sprite:arcade.Sprite = arcade.Sprite(center_x=SCREEN_WIDTH/10, center_y=SCREEN_HEIGHT)
