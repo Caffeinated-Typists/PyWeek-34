@@ -28,7 +28,7 @@ TILE_SCALING:float = 0.5
 
 #Physics Constants
 GRAVITY:float = 0.6
-GAME_SPEED:int = 8
+GAME_SPEED:int = 5
 CLOUD_SPEED:float = 0.1 * GAME_SPEED
 
 # Tile Constants
@@ -215,6 +215,7 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time: float):
         """Specify the computations at each refresh"""
+        global GAME_SPEED
         self.process_key_change()
         self.physics_engine.update()
 
@@ -254,9 +255,15 @@ class GameView(arcade.View):
                 bullet.remove_from_sprite_lists()
 
         #checking for collision with env objects
-        self.hit_list:list = arcade.check_for_collision_with_lists(self.protagonist, [self.scene[LAYER_OBJECTS], self.scene[LAYER_UFO]])
+        self.hit_list:list = arcade.check_for_collision_with_lists(self.protagonist, [self.scene[LAYER_OBJECTS], self.scene[LAYER_UFO], self.scene[LAYER_BULLETS]])
         if len(self.hit_list) > 0:
-            self.window.show_view(MainMenu())
+            self.protagonist.died(self.scene)
+            GAME_SPEED = 0
+            self.scene[LAYER_BULLETS].clear()
+            self.scene[LAYER_OBJECTS].clear()
+            self.scene[LAYER_UFO].clear()
+            self.scene[LAYER_CEILING].clear()
+            # self.window.show_view(MainMenu())
 
     def generate_platform(self, start:int):
         """Generates the platform"""

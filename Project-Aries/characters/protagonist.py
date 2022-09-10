@@ -1,5 +1,8 @@
+import sys, os
 import typing
 import arcade
+sys.path.append(os.getcwd() + r"\Project-Aries")
+from characters.enemy import Death_Sprite
 
 #Constants for Protagonist
 PROTAGONIST_SCALING:float = 0.22
@@ -21,6 +24,8 @@ IMAGE_PIXEL_WIDTH:int = 692
 FLYING_IMAGE_PIXEL_WIDTH:int = 881
 FLYING_IMAGE_PIXEL_HEIGHT:int = 639
 
+LAYER_DEATH:str = "Death"
+
 
 class Protagonist(arcade.Sprite):
 
@@ -37,8 +42,9 @@ class Protagonist(arcade.Sprite):
         self.running_textures:list[arcade.Texture] = self.add_animation("no_weapon_white_helmet_standing_run", 15)
         self.walking_textures:list[arcade.Texture] = self.add_animation("no_weapon_white_helmet_standing_walk", 15)
 
-        self.dying_flying_textures:list[arcade.Texture] = None
-        self.dying_walking_textures:list[arcade.Texture] = None
+        self.with_gun_dying_flying_textures:list[arcade.Texture] = self.add_animation("with_weapon_flying_die", 5)
+        self.dying_flying_textures:list[arcade.Texture] = self.add_animation("no_weapon_white_helmet_flying_die", 5)
+        self.dying_walking_textures:list[arcade.Texture] = self.add_animation("no_weapon_white_helmet_standing_die", 5)
         self.texture:arcade.Texture = self.idle_texture
         self.textures:list[arcade.Texture] = None      
 
@@ -48,6 +54,7 @@ class Protagonist(arcade.Sprite):
         self.is_on_ground:bool = False
         self.can_shoot:bool = False
         self.is_shooting:bool = False
+        self.is_dead:bool = False
         self.cur_texture:int = 0
 
         self.horizontal_vel:int = PROTAGONIST_SPEED
@@ -108,6 +115,22 @@ class Protagonist(arcade.Sprite):
     def fly(self) -> None:
         """Update the y-velocity for jumping"""
         self.update_vel_y(self.jetpack_accln)
+
+    def died(self, scene:arcade.Scene) -> None:
+        """Protagonist has been killed"""
+        self.is_dead = True
+        if self.is_falling or self.is_flying:
+            if self.can_shoot:
+                self.textures = self.with_gun_dying_flying_textures
+            else:
+                self.textures = self.dying_flying_textures
+        else:
+            self.textures = self.dying_walking_textures
+        self.remove_from_sprite_lists()
+        death_sprite:Death_Sprite = Death_Sprite(self.textures, PROTAGONIST_SCALING)
+        death_sprite.center_x = self.center_x
+        death_sprite.center_y = self.center_y
+        scene.add_sprite(LAYER_DEATH, death_sprite)
 
     def shoot(self, scene:arcade.scene) -> None:
         """Shoot bullets at the opponent"""
