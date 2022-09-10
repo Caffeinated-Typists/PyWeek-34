@@ -6,7 +6,7 @@ from time import time
 import os
 import sys
 
-sys.path.append(os.getcwd() + r"\PyWeek-34")
+sys.path.append(os.getcwd() + r"\Project-Aries")
 
 from characters.protagonist import Protagonist
 from clouds.clouds import Cloud
@@ -42,6 +42,9 @@ PLATFORM_CENTER_Y:int = PLATFORM_HEIGHT // 2
 CHARACTER_LEFT:int = 100
 CHARACTER_BOTTOM:int = PLATFORM_HEIGHT 
 
+#Bullet Constants
+BULLET_DAMAGE:int = 100
+
 # Game resources
 # platforms 
 CORNER_PIECE_LEFT:str = r"resources/Game Assets/deserttileset/png/Tile/1.png"
@@ -59,7 +62,7 @@ LAYER_PLATFORM:str = "Platform"
 LAYER_CEILING:str = "Ceiling"
 LAYER_PROTAGONIST:str = "Protagonist"
 LAYER_CLOUD:str = "Clouds"
-LAYER_ENVIRONMENT:str = "Environment"
+LAYER_FOLIAGE:str = "Foliage"
 LAYER_OBJECTS:str = "Objects"
 LAYER_BULLETS:str = "Bullets"
 LAYER_UFO:str = "UFO"
@@ -68,7 +71,7 @@ LAYER_TEMP:str = "Temp"
 #set of objects to be used
 OBJECTS:dict[str:typing.Optional] = {
     LAYER_CLOUD: Cloud, 
-    LAYER_ENVIRONMENT: Foliage,
+    LAYER_FOLIAGE: Foliage,
     LAYER_OBJECTS: EnvObject,
     LAYER_UFO: UFO
     }
@@ -158,7 +161,7 @@ class GameView(arcade.View):
         #adding the layers
         self.scene.add_sprite_list(LAYER_PLATFORM)
         self.scene.add_sprite_list(LAYER_CLOUD)
-        self.scene.add_sprite_list(LAYER_ENVIRONMENT)
+        self.scene.add_sprite_list(LAYER_FOLIAGE)
         self.scene.add_sprite_list(LAYER_TEMP)
         self.scene.add_sprite_list(LAYER_OBJECTS)
         self.scene.add_sprite_list(LAYER_CEILING)
@@ -188,14 +191,14 @@ class GameView(arcade.View):
         # temp_sprite:arcade.Sprite = arcade.Sprite(r"C:\Users\aniru\Downloads\sketch1662664053401.png", 0.3)
         # temp_sprite.center_x = 700
         # temp_sprite.center_y = PLATFORM_CENTER_Y + 100
-        # self.scene.add_sprite(LAYER_ENVIRONMENT, temp_sprite)
+        # self.scene.add_sprite(LAYER_FOLIAGE, temp_sprite)
 
         #environment sprites
 
 
         #adding initial object into the layers
         self.init_sprites(LAYER_CLOUD, 0, SCREEN_WIDTH, 2)
-        self.init_sprites(LAYER_ENVIRONMENT, 0, SCREEN_WIDTH, 2)
+        self.init_sprites(LAYER_FOLIAGE, 0, SCREEN_WIDTH, 2)
         self.init_sprites(LAYER_OBJECTS, SCREEN_WIDTH, SCREEN_WIDTH * 2, 2)
         self.init_sprites(LAYER_UFO, SCREEN_WIDTH, SCREEN_WIDTH * 2, 2)
 
@@ -230,7 +233,7 @@ class GameView(arcade.View):
         #moving elements in the scene
         self.move_and_pop(LAYER_PLATFORM, GAME_SPEED)
         self.move_and_pop(LAYER_CLOUD, CLOUD_SPEED)
-        self.move_and_pop(LAYER_ENVIRONMENT, GAME_SPEED)
+        self.move_and_pop(LAYER_FOLIAGE, GAME_SPEED)
         self.move_and_pop(LAYER_OBJECTS, GAME_SPEED)
         self.move_and_pop(LAYER_UFO, GAME_SPEED)
 
@@ -242,24 +245,24 @@ class GameView(arcade.View):
 
         #adding clouds, and foliage
         self.add_layer_sprites(LAYER_CLOUD, 2, 1, SCREEN_WIDTH)
-        self.add_layer_sprites(LAYER_ENVIRONMENT, 2, 1, SCREEN_WIDTH)
+        self.add_layer_sprites(LAYER_FOLIAGE, 2, 1, SCREEN_WIDTH)
         self.add_layer_sprites(LAYER_OBJECTS, 2, 1, SCREEN_WIDTH * 2)
         self.add_layer_sprites(LAYER_UFO, 2, 1, SCREEN_WIDTH)
-
-        #checking for collision with env objects
-        self.hit_list:list = arcade.check_for_collision_with_list(self.protagonist, self.scene[LAYER_OBJECTS])
-        if len(self.hit_list) > 0:
-            self.window.show_view(MainMenu())
 
         #checking for collisions with bullets
         for ufo in self.scene[LAYER_UFO]:
             hit_list = arcade.check_for_collision_with_list(ufo, self.scene[LAYER_BULLETS])
             if len(hit_list) > 0:
-                #Update bullet damage to ufo
-                pass
+                if ufo.update_bullet_damage(BULLET_DAMAGE):
+                    ufo.play_dead_animation(self.scene)
+                    ufo.remove_from_sprite_lists()
             for bullet in hit_list:
                 bullet.remove_from_sprite_lists()
 
+        #checking for collision with env objects
+        self.hit_list:list = arcade.check_for_collision_with_lists(self.protagonist, [self.scene[LAYER_OBJECTS], self.scene[LAYER_UFO]])
+        if len(self.hit_list) > 0:
+            self.window.show_view(MainMenu())
 
     def generate_platform(self, start:int):
         """Generates the platform"""

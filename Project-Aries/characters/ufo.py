@@ -3,7 +3,7 @@ import math
 import random
 import typing
 import arcade
-sys.path.append(os.getcwd() + r"\PyWeek-34")
+sys.path.append(os.getcwd() + r"\Project-Aries")
 from characters.enemy import Enemy
 
 # UFO Constants
