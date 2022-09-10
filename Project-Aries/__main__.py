@@ -15,7 +15,7 @@ from foliage.foliage import Foliage
 from env_objects.env_objects import EnvObject
 from characters.ufo import UFO
 from characters.crawler import Crawler
-
+from characters.spaceship import SpaceShip
 
 #screen constants
 SCREEN_WIDTH:int = 1000
@@ -78,6 +78,7 @@ LAYER_BULLETS:str = "Bullets"
 LAYER_UFO:str = "UFO"
 LAYER_CRAWLER:str = "Crawlers"
 LAYER_DEATH:str = "Death"
+LAYER_SPACESHIP:str = "Spaceship"
 
 #set of objects to be used
 OBJECTS:dict[str:typing.Optional] = {
@@ -86,7 +87,8 @@ OBJECTS:dict[str:typing.Optional] = {
     LAYER_OBJECTS: EnvObject,
     LAYER_UFO: UFO,
     LAYER_CRAWLER: Crawler,
-    }
+    LAYER_SPACESHIP: SpaceShip,
+}
 
 def reset_dir()->bool:
     """Resets the current working directory to file path of this file"""
@@ -207,6 +209,7 @@ class GameView(arcade.View):
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
         self.scene.add_sprite_list(LAYER_UFO)
         self.scene.add_sprite_list(LAYER_CRAWLER)
+        self.scene.add_sprite_list(LAYER_SPACESHIP)
         self.scene.add_sprite_list(LAYER_BULLETS)
 
         self.scene[LAYER_CLOUD].alpha = 100
