@@ -1,5 +1,7 @@
 import typing
 import arcade
+import arcade.gui
+import copy
 from time import time
 import os
 import sys
@@ -45,6 +47,8 @@ CHARACTER_BOTTOM:int = PLATFORM_HEIGHT
 CORNER_PIECE_LEFT:str = r"resources/Game Assets/deserttileset/png/Tile/1.png"
 MIDDLE_PIECE:str = r"resources/Game Assets/deserttileset/png/Tile/2.png"  
 CORNER_PIECE_RIGHT:str = r"resources/Game Assets/deserttileset/png/Tile/3.png"
+#font
+FONT:str = r"resources/Game Assets/GROBOLD.ttf"
 
 #background
 BACKGROUND:str = r"resources/Game Assets/deserttileset/png/BG.png"
@@ -81,21 +85,47 @@ class MainMenu(arcade.View):
         """Initializes the main menu"""
         super().__init__()
         self.background:arcade.Texture = arcade.load_texture(BACKGROUND)
+        self.manager:arcade.gui.UIManager = arcade.gui.UIManager()
+        self.manager.enable()
+        arcade.load_font(FONT)
+        start_style:dict[str:typing.Optional] = {
+            "font_color": arcade.color.UFO_GREEN,
+            "font_size": 40,
+            "font_name": "GROBOLD",
+            "bg_color": (15, 15, 15, 100),
+
+            "bg_color_hover": (30, 30, 30, 100),
+        }
+        
+        end_style:dict[str:typing.Optional] = copy.deepcopy(start_style)
+        end_style["font_color"] = arcade.color.OUTRAGEOUS_ORANGE
+        
+
+        start:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Start", x=SCREEN_WIDTH//3- 100, y=SCREEN_HEIGHT//3 - 50, width=200, height=100, style=start_style)
+        exit_game:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Exit", x= (2 * SCREEN_WIDTH//3) - 100, y=SCREEN_HEIGHT//3 - 50, width=200, height=100, style=end_style)
+        self.manager.add(start)
+        self.manager.add(exit_game)
 
     def on_show(self)->None:
         """Display window on function call"""
         arcade.set_background_color(arcade.color.RED_BROWN)
 
+
     def on_draw(self)->None:
         """Instructions for layout of window"""
         self.clear()
         arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
+        self.manager.draw()
 
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         """When mouse is clicked, start game"""
-        game_view:GameView = GameView()
-        self.window.show_view(game_view)
+        if (x > SCREEN_WIDTH//3 - 100 and x < SCREEN_WIDTH//3 + 100) and (y > SCREEN_HEIGHT//3 - 50 and y < SCREEN_HEIGHT//3 + 50):
+            game_view:GameView = GameView()
+            self.window.show_view(game_view)
+
+        elif (x > (2 * SCREEN_WIDTH//3) - 100 and x < (2 * SCREEN_WIDTH//3) + 100) and (y > SCREEN_HEIGHT//3 - 50 and y < SCREEN_HEIGHT//3 + 50):
+            arcade.close_window()
 
 class GameView(arcade.View):
     """Class for the handling all the game related functionality"""
@@ -189,13 +219,13 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time: float):
         """Specify the computations at each refresh"""
+        self.process_key_change()
         self.physics_engine.update()
 
         self.scene.update_animation(delta_time, [LAYER_PROTAGONIST])
         self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS])
 
-        self.process_key_change()
-        self.protagonist.set_pos_left(CHARACTER_LEFT)
+        self.protagonist.set_pos_x(CHARACTER_BOTTOM + self.protagonist.width // 2)
 
         #moving elements in the scene
         self.move_and_pop(LAYER_PLATFORM, GAME_SPEED)
@@ -220,6 +250,15 @@ class GameView(arcade.View):
         self.hit_list:list = arcade.check_for_collision_with_list(self.protagonist, self.scene[LAYER_OBJECTS])
         if len(self.hit_list) > 0:
             self.window.show_view(MainMenu())
+
+        #checking for collisions with bullets
+        for ufo in self.scene[LAYER_UFO]:
+            hit_list = arcade.check_for_collision_with_list(ufo, self.scene[LAYER_BULLETS])
+            if len(hit_list) > 0:
+                #Update bullet damage to ufo
+                pass
+            for bullet in hit_list:
+                bullet.remove_from_sprite_lists()
 
 
     def generate_platform(self, start:int):
@@ -278,8 +317,6 @@ class GameView(arcade.View):
         if key == arcade.key.SPACE or key == arcade.key.UP:
             self.space_pressed = True
 
-        self.process_key_change()
-
     def on_key_release(self, key: int, modifiers: int):
         """Process when a key is released by the user"""
         
@@ -287,10 +324,8 @@ class GameView(arcade.View):
             self.shoot_pressed = False
             self.can_shoot = True
 
-        if key == arcade.key.SPACE or arcade.key.UP:
+        if key == arcade.key.SPACE or key == arcade.key.UP:
             self.space_pressed = False
-
-        self.process_key_change()
 
     def clear_extra_bullets(self) -> None:
         """Remove bullets which have left the screen out of Sprite list"""
