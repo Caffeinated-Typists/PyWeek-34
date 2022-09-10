@@ -66,7 +66,7 @@ LAYER_FOLIAGE:str = "Foliage"
 LAYER_OBJECTS:str = "Objects"
 LAYER_BULLETS:str = "Bullets"
 LAYER_UFO:str = "UFO"
-LAYER_TEMP:str = "Temp"
+LAYER_DEATH:str = "Death"
 
 #set of objects to be used
 OBJECTS:dict[str:typing.Optional] = {
@@ -162,7 +162,7 @@ class GameView(arcade.View):
         self.scene.add_sprite_list(LAYER_PLATFORM)
         self.scene.add_sprite_list(LAYER_CLOUD)
         self.scene.add_sprite_list(LAYER_FOLIAGE)
-        self.scene.add_sprite_list(LAYER_TEMP)
+        self.scene.add_sprite_list(LAYER_DEATH)
         self.scene.add_sprite_list(LAYER_OBJECTS)
         self.scene.add_sprite_list(LAYER_CEILING)
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
@@ -185,13 +185,6 @@ class GameView(arcade.View):
 
         #adding middle sprites
         self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)
-
-        
-        # temp sprite
-        # temp_sprite:arcade.Sprite = arcade.Sprite(r"C:\Users\aniru\Downloads\sketch1662664053401.png", 0.3)
-        # temp_sprite.center_x = 700
-        # temp_sprite.center_y = PLATFORM_CENTER_Y + 100
-        # self.scene.add_sprite(LAYER_FOLIAGE, temp_sprite)
 
         #environment sprites
 
@@ -295,6 +288,7 @@ class GameView(arcade.View):
             for i in range(no_of_objects):
                 temp_sprite:arcade.Sprite = OBJECTS[layer](position=start_position)
                 self.scene.add_sprite(layer, temp_sprite)
+                
     def generate_ceiling(self):
         """Generates the ceiling for the Game Window"""
         ceiling_sprite:arcade.Sprite = arcade.Sprite(center_x=SCREEN_WIDTH/10, center_y=SCREEN_HEIGHT)
