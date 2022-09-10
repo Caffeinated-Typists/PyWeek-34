@@ -28,7 +28,7 @@ TILE_SCALING:float = 0.5
 
 #Physics Constants
 GRAVITY:float = 0.6
-GAME_SPEED:int = 8
+GAME_SPEED:int = 5
 CLOUD_SPEED:float = 0.1 * GAME_SPEED
 
 # Tile Constants
@@ -70,7 +70,7 @@ LAYER_FOLIAGE:str = "Foliage"
 LAYER_OBJECTS:str = "Objects"
 LAYER_BULLETS:str = "Bullets"
 LAYER_UFO:str = "UFO"
-LAYER_TEMP:str = "Temp"
+LAYER_DEATH:str = "Death"
 
 #set of objects to be used
 OBJECTS:dict[str:typing.Optional] = {
@@ -176,7 +176,7 @@ class GameView(arcade.View):
         self.scene.add_sprite_list(LAYER_PLATFORM)
         self.scene.add_sprite_list(LAYER_CLOUD)
         self.scene.add_sprite_list(LAYER_FOLIAGE)
-        self.scene.add_sprite_list(LAYER_TEMP)
+        self.scene.add_sprite_list(LAYER_DEATH)
         self.scene.add_sprite_list(LAYER_OBJECTS)
         self.scene.add_sprite_list(LAYER_CEILING)
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
@@ -204,13 +204,6 @@ class GameView(arcade.View):
 
         #adding middle sprites
         self.generate_platform(PLATFORM_WIDTH + PLATFORM_CENTER_X)
-
-        
-        # temp sprite
-        # temp_sprite:arcade.Sprite = arcade.Sprite(r"C:\Users\aniru\Downloads\sketch1662664053401.png", 0.3)
-        # temp_sprite.center_x = 700
-        # temp_sprite.center_y = PLATFORM_CENTER_Y + 100
-        # self.scene.add_sprite(LAYER_FOLIAGE, temp_sprite)
 
         #environment sprites
 
@@ -241,11 +234,12 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time: float):
         """Specify the computations at each refresh"""
+        global GAME_SPEED
         self.process_key_change()
         self.physics_engine.update()
 
-        self.scene.update_animation(delta_time, [LAYER_PROTAGONIST])
-        self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS])
+        self.scene.update_animation(delta_time, [LAYER_PROTAGONIST, LAYER_DEATH])
+        self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS, LAYER_UFO])
 
         self.protagonist.set_pos_x(CHARACTER_BOTTOM + self.protagonist.width // 2)
 
@@ -255,6 +249,7 @@ class GameView(arcade.View):
         self.move_and_pop(LAYER_FOLIAGE, GAME_SPEED)
         self.move_and_pop(LAYER_OBJECTS, GAME_SPEED)
         self.move_and_pop(LAYER_UFO, GAME_SPEED)
+        self.move_and_pop(LAYER_DEATH, GAME_SPEED)
 
         #adding platforms 
         self.clear_extra_bullets()
@@ -280,13 +275,20 @@ class GameView(arcade.View):
                 bullet.remove_from_sprite_lists()
 
         #checking for collision with env objects
-        self.hit_list:list = arcade.check_for_collision_with_lists(self.protagonist, [self.scene[LAYER_OBJECTS], self.scene[LAYER_UFO]])
+        self.hit_list:list = arcade.check_for_collision_with_lists(self.protagonist, [self.scene[LAYER_OBJECTS], self.scene[LAYER_UFO], self.scene[LAYER_BULLETS]])
         if len(self.hit_list) > 0:
             arcade.stop_sound(self.bg_player)
             arcade.play_sound(self.end_game)
             if self.protagonist.sound_player_flying: self.protagonist.sound_player_flying.pause()
             if self.protagonist.sound_player_ground: self.protagonist.sound_player_ground.pause()
-            self.window.show_view(MainMenu())
+
+            self.protagonist.died(self.scene)
+            GAME_SPEED = 0
+            self.scene[LAYER_BULLETS].clear()
+            self.scene[LAYER_OBJECTS].clear()
+            self.scene[LAYER_UFO].clear()
+            self.scene[LAYER_CEILING].clear()
+            # self.window.show_view(MainMenu())
 
     def generate_platform(self, start:int):
         """Generates the platform"""
@@ -298,6 +300,9 @@ class GameView(arcade.View):
 
     def move_and_pop(self, layer:str, speed:int) -> None:
         """Moves all the sprites in the layer and pops the ones that are out of the screen"""
+        if len(self.scene[layer]) == 0:
+            return
+
         for i in self.scene[layer]:
             i.center_x = i.center_x-speed
             
@@ -319,6 +324,7 @@ class GameView(arcade.View):
             for i in range(no_of_objects):
                 temp_sprite:arcade.Sprite = OBJECTS[layer](position=start_position)
                 self.scene.add_sprite(layer, temp_sprite)
+
     def generate_ceiling(self):
         """Generates the ceiling for the Game Window"""
         ceiling_sprite:arcade.Sprite = arcade.Sprite(center_x=SCREEN_WIDTH/10, center_y=SCREEN_HEIGHT)
