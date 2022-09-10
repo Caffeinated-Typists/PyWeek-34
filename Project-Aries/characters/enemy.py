@@ -6,6 +6,9 @@ import random
 SCREEN_WIDTH:int = 1000
 SCREEN_HEIGHT:int = 480
 
+#Layer names
+LAYER_DEATH:str = "Death"
+
 class Enemy(arcade.Sprite):
 
     def __init__(self, hitpoints:int, scale:int = 1) -> None:
@@ -13,7 +16,7 @@ class Enemy(arcade.Sprite):
         super().__init__(scale = scale)
         self.hitpoints:int = hitpoints
         self.cur_texture:int = 0
-        self.death_texture:arcade.Texture = None
+        self.death_textures:list[arcade.Texture] = None
         
     def set_pos_x(self, x:int) -> None:
         """Set x-position of Sprite"""
@@ -51,7 +54,7 @@ class Enemy(arcade.Sprite):
 
     def update_bullet_damage(self, damage:int) -> bool:
         """Update the hitpoints of Sprite after being hit by a bullet, returns True if the enemy dies"""
-        self.hitpoints = min(self.hitpoints - damage, 0)
+        self.hitpoints = max(self.hitpoints - damage, 0)
         if self.hitpoints == 0:
             return True
         else:
@@ -59,10 +62,30 @@ class Enemy(arcade.Sprite):
     
     def play_dead_animation(self, scene:arcade.scene) -> None:
         """Add a Sprite to play the death animation to scene"""
+        death_sprite:Death_Sprite = Death_Sprite(self.death_textures)
+        death_sprite.center_x = self.center_x
+        death_sprite.center_y = self.center_y
+        scene.add_sprite(LAYER_DEATH, death_sprite)
 
     def update_animation(self, delta_time: float):
-        """Update the animations upon death"""
+        """Update the animations"""
         self.cur_texture += 1
         if self.cur_texture >= len(self.textures):
             self.cur_texture = 0
         self.texture = self.textures[self.cur_texture]
+
+
+class Death_Sprite(arcade.Sprite):
+
+    def __init__(self, death_animations:list[arcade.Texture], scale:float = 1):
+        """Initialize the class"""
+        super().__init__(scale = scale)
+        self.textures:list[arcade.Texture] = death_animations
+        self.cur_texture_index:int = 0
+
+    def update_animation(self, delta_time: float):
+        if self.cur_texture_index < len(self.textures):
+            self.texture = self.textures[self.cur_texture_index]
+        else:
+            self.remove_from_sprite_lists()
+        self.cur_texture_index += 1
