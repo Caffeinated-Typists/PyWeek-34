@@ -132,7 +132,7 @@ class Protagonist(arcade.Sprite):
         """Update the y-velocity for jumping"""
         self.update_vel_y(self.jetpack_accln)
 
-    def died(self, scene:arcade.Scene) -> None:
+    def died(self, scene:arcade.Scene) -> arcade.Sprite:
         """Protagonist has been killed"""
         self.is_dead = True
         if self.is_falling or self.is_flying:
@@ -148,6 +148,7 @@ class Protagonist(arcade.Sprite):
         death_sprite.center_x = self.center_x
         death_sprite.center_y = self.center_y
         scene.add_sprite(LAYER_DEATH, death_sprite)
+        return death_sprite
 
     def shoot(self, scene:arcade.scene) -> None:
         """Shoot bullets at the opponent"""
