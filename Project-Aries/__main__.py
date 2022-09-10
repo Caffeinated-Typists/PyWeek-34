@@ -171,6 +171,7 @@ class GameView(arcade.View):
         self.protagonist:arcade.Sprite = None
 
         self.score = 0
+        self.last_update:time = None
 
         self.physics_engine:arcade.PhysicsEnginePlatformer = None
 
@@ -247,6 +248,7 @@ class GameView(arcade.View):
 
         global START_TIME
         START_TIME = time()
+        self.last_update = START_TIME
 
     def on_show_view(self)->None:
         """Display window on function call"""
@@ -258,15 +260,18 @@ class GameView(arcade.View):
         arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
         self.scene.draw()
         if not self.protagonist.is_dead:
-            arcade.draw_text(f"SCORE: {round(self.score, 2)}", PLATFORM_HEIGHT/10, PLATFORM_WIDTH/2, arcade.csscolor.WHITE, 15)
+            arcade.draw_text(f"SCORE: {round(self.score)}", PLATFORM_HEIGHT/10, PLATFORM_WIDTH/2, arcade.csscolor.WHITE, 15)
         self.manager.draw()
         if self.protagonist.is_dead:
             self.end_text.draw()
+            self.score_text.draw()
 
     def on_update(self, delta_time: float):
         """Specify the computations at each refresh"""
         global GAME_SPEED
-        self.score+=delta_time*TIME_MULTIPLIER
+        if not self.protagonist.is_dead:
+            self.score+=(time() - self.last_update)*TIME_MULTIPLIER
+            self.last_update = time()
         self.process_key_change()
         self.physics_engine.update()
 
@@ -320,11 +325,13 @@ class GameView(arcade.View):
             if self.protagonist.sound_player_flying: self.protagonist.sound_player_flying.pause()
             if self.protagonist.sound_player_ground: self.protagonist.sound_player_ground.pause()
 
-            self.protagonist.died(self.scene)
+            self.dead_protagonist:arcade.Sprite = self.protagonist.died(self.scene)
+            self.physics_engine = arcade.PhysicsEnginePlatformer(self.dead_protagonist, platforms=self.scene[LAYER_PLATFORM], gravity_constant=GRAVITY/2)
             GAME_SPEED = 0
             self.scene[LAYER_BULLETS].clear()
             self.scene[LAYER_OBJECTS].clear()
             self.scene[LAYER_UFO].clear()
+            self.scene[LAYER_CRAWLER].clear()
             self.scene[LAYER_CEILING].clear()
 
             restart:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Restart", x=SCREEN_WIDTH//3- 100, y=SCREEN_HEIGHT//4 - 50, width=200, height=100, style=self.restart_style)
@@ -332,6 +339,7 @@ class GameView(arcade.View):
             self.manager.add(restart)
             self.manager.add(exit_game)
             self.end_text:arcade.Text = arcade.Text("GAME OVER", SCREEN_WIDTH//2, 2 * SCREEN_HEIGHT//3, arcade.color.WHITE, 65, width=100, font_name="consolas", align="left", anchor_x="center", anchor_y="center")
+            self.score_text:arcade.Text = arcade.Text(f"SCORE: {round(self.score)}", SCREEN_WIDTH//2, SCREEN_HEIGHT//2, arcade.color.WHITE, 30, width=150, font_name="consolas", align="left", anchor_x="center")
 
             # self.window.show_view(MainMenu())
 
