@@ -225,7 +225,7 @@ class GameView(arcade.View):
         self.scene.update_animation(delta_time, [LAYER_PROTAGONIST])
         self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS])
 
-        self.protagonist.set_pos_left(CHARACTER_LEFT)
+        self.protagonist.set_pos_x(CHARACTER_BOTTOM + self.protagonist.width // 2)
 
         #moving elements in the scene
         self.move_and_pop(LAYER_PLATFORM, GAME_SPEED)

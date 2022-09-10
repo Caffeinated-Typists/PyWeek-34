@@ -12,8 +12,8 @@ LAYER_BULLETS:str = "Bullets"
 BULLET_SCALE:float = 0.8
 BULLET_SPEED:int = 10
 BULLET_DAMAGE:int = 100
-BULLET_MARGIN_X:int = 70
-BULLET_MARGIN_Y:int = 5
+BULLET_MARGIN_X:int = 50
+BULLET_MARGIN_Y:int = 0
 
 #Constants for getting Images from Sprite List
 IMAGE_PIXEL_HEIGHT:int = 599
@@ -28,14 +28,14 @@ class Protagonist(arcade.Sprite):
         """Initialize the character"""
         super().__init__(scale = PROTAGONIST_SCALING)
         self.idle_texture:arcade.Texture = arcade.load_texture("characters/jetpack character/no_weapon_white_helmet_standing_idle.png", x = 0, y = 0, width = IMAGE_PIXEL_WIDTH, height = IMAGE_PIXEL_HEIGHT) 
-        self.flying_textures:list[arcade.Texture] = self.add_animation("no_weapon_white_helmet_flying", 15, IMAGE_PIXEL_WIDTH, IMAGE_PIXEL_HEIGHT)
-        self.with_gun_flying_textures:list[arcade.Texture] = self.add_animation("with_weapon_flying", 15, FLYING_IMAGE_PIXEL_WIDTH, FLYING_IMAGE_PIXEL_HEIGHT)
-        self.shooting_flying_textures:list[arcade.Texture] = self.add_animation("with_weapon_flying_shoot", 10, FLYING_IMAGE_PIXEL_WIDTH, FLYING_IMAGE_PIXEL_HEIGHT)
-        self.falling_textures:list[arcade.Texture] = self.add_animation("no_weapon_white_helmet_standing_idle", 15, IMAGE_PIXEL_WIDTH, IMAGE_PIXEL_HEIGHT)
-        self.with_gun_falling_textures:list[arcade.Texture] = self.add_animation("with_weapon_standing_idle", 15, FLYING_IMAGE_PIXEL_WIDTH, FLYING_IMAGE_PIXEL_HEIGHT)
-        self.shooting_falling_textures:list[arcade.Texture] = self.add_animation("with_weapon_standing_shoot", 5, FLYING_IMAGE_PIXEL_WIDTH, FLYING_IMAGE_PIXEL_HEIGHT)
-        self.running_textures:list[arcade.Texture] = self.add_animation("no_weapon_white_helmet_standing_run", 15, IMAGE_PIXEL_WIDTH, IMAGE_PIXEL_HEIGHT)
-        self.walking_textures:list[arcade.Texture] = self.add_animation("no_weapon_white_helmet_standing_walk", 15, IMAGE_PIXEL_WIDTH, IMAGE_PIXEL_HEIGHT)
+        self.flying_textures:list[arcade.Texture] = self.add_animation("no_weapon_white_helmet_flying", 15)
+        self.with_gun_flying_textures:list[arcade.Texture] = self.add_animation("with_weapon_flying", 15)
+        self.shooting_flying_textures:list[arcade.Texture] = self.add_animation("with_weapon_flying_shoot", 10)
+        self.falling_textures:list[arcade.Texture] = self.add_animation("no_weapon_white_helmet_standing_idle", 15)
+        self.with_gun_falling_textures:list[arcade.Texture] = self.add_animation("with_weapon_standing_idle", 15)
+        self.shooting_falling_textures:list[arcade.Texture] = self.add_animation("with_weapon_standing_shoot", 5)
+        self.running_textures:list[arcade.Texture] = self.add_animation("no_weapon_white_helmet_standing_run", 15)
+        self.walking_textures:list[arcade.Texture] = self.add_animation("no_weapon_white_helmet_standing_walk", 15)
 
         self.dying_flying_textures:list[arcade.Texture] = None
         self.dying_walking_textures:list[arcade.Texture] = None
@@ -180,13 +180,13 @@ class Protagonist(arcade.Sprite):
             self.textures = self.walking_textures
             self.animate()
 
-    def add_animation(self, spriteSheet:str, count:int, width:int, height:int) -> list[arcade.Texture]:
+    def add_animation(self, spriteSheet:str, count:int) -> list[arcade.Texture]:
         """Add animation sprites to the protagonist"""
         rval:list[arcade.Texture] = []
         for i in range(count):
-            x = (i % 5) * width
-            y = (i // 5) * height
-            texture = arcade.load_texture(f"characters/jetpack character/{spriteSheet}.png", x, y, width, height)
+            column:int = (i % 5) + 1
+            row:int = (i // 5) + 1
+            texture = arcade.load_texture(f"characters/jetpack character/{spriteSheet}/row-{row}-column-{column}.png")
             rval.append(texture)
         
         return rval
