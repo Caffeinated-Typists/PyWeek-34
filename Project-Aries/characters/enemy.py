@@ -18,11 +18,11 @@ class Enemy(arcade.Sprite):
         self.cur_texture:int = 0
         self.death_textures:list[arcade.Texture] = None
         
-    def set_pos_x(self, x:int = SCREEN_WIDTH) -> None:
+    def set_pos_x(self, x:int) -> None:
         """Set x-position of Sprite"""
         self.center_x = x
 
-    def set_pos_y(self, y:int = SCREEN_HEIGHT//2) -> None:
+    def set_pos_y(self, y:int) -> None:
         """Set y-position of Sprite"""
         self.center_x = y
 
