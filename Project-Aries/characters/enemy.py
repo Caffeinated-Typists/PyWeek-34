@@ -69,6 +69,8 @@ class Enemy(arcade.Sprite):
 
     def update_animation(self, delta_time: float):
         """Update the animations"""
+        if len(self.textures) == 0:
+            return
         self.cur_texture += 1
         if self.cur_texture >= len(self.textures):
             self.cur_texture = 0

@@ -7,7 +7,7 @@ PLATFORM_HEIGHT:int = int(128 * TILE_SCALING)
 SCREEN_WIDTH:int = 1000
 SCREEN_HEIGHT:int = 480
 
-FOLIAGE_SCALING:float = 0.07
+FOLIAGE_SCALING:float = 0.15
 
 class Foliage(arcade.Sprite):
     def __init__(self, position:int = 0) -> None:

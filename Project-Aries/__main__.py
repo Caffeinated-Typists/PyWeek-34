@@ -14,6 +14,7 @@ from clouds.clouds import Cloud
 from foliage.foliage import Foliage
 from env_objects.env_objects import EnvObject
 from characters.ufo import UFO
+from characters.crawler import Crawler
 
 
 #screen constants
@@ -75,6 +76,7 @@ LAYER_FOLIAGE:str = "Foliage"
 LAYER_OBJECTS:str = "Objects"
 LAYER_BULLETS:str = "Bullets"
 LAYER_UFO:str = "UFO"
+LAYER_CRAWLER:str = "Crawlers"
 LAYER_DEATH:str = "Death"
 
 #set of objects to be used
@@ -82,7 +84,8 @@ OBJECTS:dict[str:typing.Optional] = {
     LAYER_CLOUD: Cloud, 
     LAYER_FOLIAGE: Foliage,
     LAYER_OBJECTS: EnvObject,
-    LAYER_UFO: UFO
+    LAYER_UFO: UFO,
+    LAYER_CRAWLER: Crawler,
     }
 
 def reset_dir()->bool:
@@ -201,8 +204,9 @@ class GameView(arcade.View):
         self.scene.add_sprite_list(LAYER_OBJECTS)
         self.scene.add_sprite_list(LAYER_CEILING)
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
-        self.scene.add_sprite_list(LAYER_BULLETS)
         self.scene.add_sprite_list(LAYER_UFO)
+        self.scene.add_sprite_list(LAYER_CRAWLER)
+        self.scene.add_sprite_list(LAYER_BULLETS)
 
         self.scene[LAYER_CLOUD].alpha = 100
         #playing audio
@@ -235,6 +239,7 @@ class GameView(arcade.View):
         self.init_sprites(LAYER_FOLIAGE, 0, SCREEN_WIDTH, 2)
         self.init_sprites(LAYER_OBJECTS, SCREEN_WIDTH, SCREEN_WIDTH * 2, 2)
         self.init_sprites(LAYER_UFO, SCREEN_WIDTH, SCREEN_WIDTH * 2, 2)
+        self.init_sprites(LAYER_CRAWLER, SCREEN_WIDTH, SCREEN_WIDTH * 2, 1)
 
         self.generate_ceiling()
 
@@ -265,8 +270,8 @@ class GameView(arcade.View):
         self.process_key_change()
         self.physics_engine.update()
 
-        self.scene.update_animation(delta_time, [LAYER_PROTAGONIST, LAYER_DEATH])
-        self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS, LAYER_UFO])
+        self.scene.update_animation(delta_time, [LAYER_PROTAGONIST, LAYER_DEATH, LAYER_UFO, LAYER_CRAWLER])
+        self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS, LAYER_UFO, LAYER_CRAWLER])
 
         self.protagonist.set_pos_x(CHARACTER_BOTTOM + self.protagonist.width // 2)
 
@@ -277,6 +282,7 @@ class GameView(arcade.View):
         self.move_and_pop(LAYER_OBJECTS, GAME_SPEED)
         self.move_and_pop(LAYER_UFO, GAME_SPEED)
         self.move_and_pop(LAYER_DEATH, GAME_SPEED)
+        self.move_and_pop(LAYER_CRAWLER, int(GAME_SPEED * 1.33))
 
         self.new_game_speed()
 
@@ -291,6 +297,7 @@ class GameView(arcade.View):
         self.add_layer_sprites(LAYER_FOLIAGE, 2, 1, SCREEN_WIDTH)
         self.add_layer_sprites(LAYER_OBJECTS, 2, 1, SCREEN_WIDTH * 2)
         self.add_layer_sprites(LAYER_UFO, 2, 1, SCREEN_WIDTH)
+        self.add_layer_sprites(LAYER_CRAWLER, 1, 1, SCREEN_WIDTH)
 
         #checking for collisions with bullets
         for ufo in self.scene[LAYER_UFO]:
@@ -306,7 +313,7 @@ class GameView(arcade.View):
                 bullet.remove_from_sprite_lists()
 
         #checking for collision with env objects
-        self.hit_list:list = arcade.check_for_collision_with_lists(self.protagonist, [self.scene[LAYER_OBJECTS], self.scene[LAYER_UFO], self.scene[LAYER_BULLETS]])
+        self.hit_list:list = arcade.check_for_collision_with_lists(self.protagonist, [self.scene[LAYER_OBJECTS], self.scene[LAYER_UFO], self.scene[LAYER_BULLETS], self.scene[LAYER_CRAWLER]])
         if len(self.hit_list) > 0:
             arcade.stop_sound(self.bg_player)
             arcade.play_sound(self.end_game)
