@@ -16,10 +16,9 @@ SPACESHIP_X_POS:int = 19*SCREEN_WIDTH//20
 SPACESHIP_INIT_Y_VEL:int = 10
 
 LAYER_ENEMY_BULLETS:str = "Enemy_Bullets"
-BULLET_SPEED:int = 5
 BULLET_SCALE:float = 0.8
 BULLET_PATH:str = "characters/Spaceship/laser.png"
-BULLET_MARGIN_X:int = 0
+BULLET_MARGIN_X:int = -20
 BULLET_MARGIN_Y:int = 0
 
 class SpaceShip(Enemy):
@@ -43,7 +42,6 @@ class SpaceShip(Enemy):
         bullet:arcade.Sprite = arcade.Sprite("characters\Spaceship\laser.png", BULLET_SCALE)
         bullet.center_x = self.center_x - BULLET_MARGIN_X
         bullet.center_y = self.center_y - BULLET_MARGIN_Y
-        bullet.change_x = -BULLET_SPEED
         scene.add_sprite(LAYER_ENEMY_BULLETS, bullet)
         self.last_shot = time()
         self.can_shoot = False

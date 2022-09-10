@@ -33,7 +33,7 @@ ENEMY_MULTIPLIER:int = 20
 TILE_SCALING:float = 0.5
 
 #Physics Constants
-GRAVITY:float = 0.6
+GRAVITY:float = 0.55
 GAME_SPEED:int = 5
 CLOUD_SPEED:float = 0.1 * GAME_SPEED
 
@@ -52,7 +52,7 @@ CHARACTER_BOTTOM:int = PLATFORM_HEIGHT
 BULLET_DAMAGE:int = 100
 
 #SpaceShip Constants
-SPACESHIP_FREQ:int = 1
+SPACESHIP_FREQ:int = 30
 SHOOT_FREQ:int = 3
 
 # Game resources
@@ -310,7 +310,8 @@ class GameView(arcade.View):
         self.move_and_pop(LAYER_UFO, GAME_SPEED)
         self.move_and_pop(LAYER_DEATH, GAME_SPEED)
         self.move_and_pop(LAYER_CRAWLER, int(GAME_SPEED * 1.33))
-        if (GAME_SPEED > 8) and (not self.protagonist.is_dead) and (len(self.scene[LAYER_SPACESHIP]) == 0) and ((time() - self.spaceship_last_seen) > SPACESHIP_FREQ):
+        self.move_and_pop(LAYER_ENEMY_BULLETS, int(GAME_SPEED * 1.2))
+        if (GAME_SPEED > 7) and (not self.protagonist.is_dead) and (len(self.scene[LAYER_SPACESHIP]) == 0) and ((time() - self.spaceship_last_seen) > SPACESHIP_FREQ):
             temp_spaceship:SpaceShip = SpaceShip()
             self.scene.add_sprite(LAYER_SPACESHIP, temp_spaceship)
 
@@ -341,7 +342,7 @@ class GameView(arcade.View):
         self.add_layer_sprites(LAYER_FOLIAGE, 2, 1, SCREEN_WIDTH)
         self.add_layer_sprites(LAYER_OBJECTS, 2, 1, SCREEN_WIDTH * 2)
         self.add_layer_sprites(LAYER_UFO, 2, 1, SCREEN_WIDTH)
-        if GAME_SPEED > 7:
+        if GAME_SPEED > 6:
             self.add_layer_sprites(LAYER_CRAWLER, 1, 1, SCREEN_WIDTH)
 
         #checking for collisions with bullets
