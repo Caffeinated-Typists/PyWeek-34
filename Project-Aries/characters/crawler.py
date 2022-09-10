@@ -16,7 +16,7 @@ class Crawler(Enemy):
         """Initialize the position"""
         super().__init__(hitpoints=CRAWLER_HITPOINTS, scale=CRAWLER_SCALING)
         
-        self.randomize_x(position)   #FIX THIS
+        self.randomize_x(position)
         self.load_animations()
         self.texture = self.textures[0]
         self.bottom:int = 64
