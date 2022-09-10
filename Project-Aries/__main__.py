@@ -303,7 +303,7 @@ class GameView(arcade.View):
         self.move_and_pop(LAYER_DEATH, GAME_SPEED)
         self.move_and_pop(LAYER_CRAWLER, int(GAME_SPEED * 1.33))
         self.move_and_pop(LAYER_ENEMY_BULLETS, int(GAME_SPEED * 1.2))
-        if (GAME_SPEED > 8) and (not self.protagonist.is_dead) and (len(self.scene[LAYER_SPACESHIP]) == 0) and ((time() - self.spaceship_last_seen) > SPACESHIP_FREQ):
+        if (GAME_SPEED > 7) and (not self.protagonist.is_dead) and (len(self.scene[LAYER_SPACESHIP]) == 0) and ((time() - self.spaceship_last_seen) > SPACESHIP_FREQ):
             temp_spaceship:SpaceShip = SpaceShip()
             self.scene.add_sprite(LAYER_SPACESHIP, temp_spaceship)
 
