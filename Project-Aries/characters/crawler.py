@@ -12,12 +12,11 @@ CRAWLER_SPEED_RATIO = 1.33
 
 class Crawler(Enemy):
 
-    def __init__(self, position:int, game_speed:int) -> None:
+    def __init__(self, position:int) -> None:
         """Initialize the position"""
         super().__init__(hitpoints=CRAWLER_HITPOINTS, scale=CRAWLER_SCALING)
         
         self.randomize_x(position)   #FIX THIS
-        self.change_x:float = -CRAWLER_SPEED_RATIO*game_speed
         self.load_animations()
         self.texture = self.textures[0]
         self.bottom:int = 64

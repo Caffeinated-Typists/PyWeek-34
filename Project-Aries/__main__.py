@@ -274,6 +274,7 @@ class GameView(arcade.View):
         self.move_and_pop(LAYER_OBJECTS, GAME_SPEED)
         self.move_and_pop(LAYER_UFO, GAME_SPEED)
         self.move_and_pop(LAYER_DEATH, GAME_SPEED)
+        self.move_and_pop(LAYER_CRAWLER, int(GAME_SPEED * 1.33))
 
         #adding platforms 
         self.clear_extra_bullets()
@@ -345,11 +346,7 @@ class GameView(arcade.View):
         """Initializes the sprites in the layer"""
         curr:int = 0
         while(curr < no_of_sprites):
-            sprite:arcade.Sprite
-            if layer == LAYER_CRAWLER:
-                sprite = OBJECTS[layer](start + curr * step, GAME_SPEED)
-            else:
-                sprite = OBJECTS[layer](start + curr * step)
+            sprite:arcade.Sprite = OBJECTS[layer](start + curr * step)
             self.scene.add_sprite(layer, sprite)
             curr += 1
 
@@ -358,11 +355,7 @@ class GameView(arcade.View):
         """Adds new items(with start_position) to the specified layer, if number of objects is less than threshold"""
         if len(self.scene[layer]) < threshold:
             for i in range(no_of_objects):
-                temp_sprite:arcade.Sprite
-                if layer == LAYER_CRAWLER:
-                    temp_sprite = OBJECTS[layer](position=start_position, game_speed = GAME_SPEED)
-                else:
-                    temp_sprite = OBJECTS[layer](position=start_position)
+                temp_sprite:arcade.Sprite = OBJECTS[layer](position=start_position)
                 self.scene.add_sprite(layer, temp_sprite)
 
     def generate_ceiling(self):
