@@ -84,8 +84,8 @@ class Death_Sprite(arcade.Sprite):
         self.cur_texture_index:int = 0
 
     def update_animation(self, delta_time: float):
-        if self.cur_texture_index < 2:
-            self.texture = self.textures[self.cur_texture_index]
+        if self.cur_texture_index < 4:
+            self.texture = self.textures[self.cur_texture_index%2]
         else:
             self.remove_from_sprite_lists()
         self.cur_texture_index += 1

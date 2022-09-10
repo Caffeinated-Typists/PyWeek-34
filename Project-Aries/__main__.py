@@ -219,7 +219,7 @@ class GameView(arcade.View):
         self.physics_engine.update()
 
         self.scene.update_animation(delta_time, [LAYER_PROTAGONIST, LAYER_DEATH])
-        self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS])
+        self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS, LAYER_UFO])
 
         self.protagonist.set_pos_x(CHARACTER_BOTTOM + self.protagonist.width // 2)
 
