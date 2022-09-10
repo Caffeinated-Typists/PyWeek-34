@@ -143,7 +143,8 @@ class Protagonist(arcade.Sprite):
         else:
             self.textures = self.dying_walking_textures
         self.remove_from_sprite_lists()
-        death_sprite:Death_Sprite = Death_Sprite(self.textures, PROTAGONIST_SCALING)
+        self.is_dead = True
+        death_sprite:Death_Sprite = Death_Sprite(self.textures, PROTAGONIST_SCALING, dont_delete = True)
         death_sprite.center_x = self.center_x
         death_sprite.center_y = self.center_y
         scene.add_sprite(LAYER_DEATH, death_sprite)

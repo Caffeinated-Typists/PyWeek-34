@@ -77,15 +77,19 @@ class Enemy(arcade.Sprite):
 
 class Death_Sprite(arcade.Sprite):
 
-    def __init__(self, death_animations:list[arcade.Texture], scale:float = 1):
+    def __init__(self, death_animations:list[arcade.Texture], scale:float = 1, dont_delete:bool = False):
         """Initialize the class"""
         super().__init__(scale = scale)
         self.textures:list[arcade.Texture] = death_animations
         self.cur_texture_index:int = 0
+        self.delete = not dont_delete
 
     def update_animation(self, delta_time: float):
         if self.cur_texture_index < len(self.textures):
             self.texture = self.textures[self.cur_texture_index]
         else:
-            self.remove_from_sprite_lists()
+            if not self.delete:
+                self.texture = self.textures[-1]
+            else:
+                self.remove_from_sprite_lists()
         self.cur_texture_index += 1
