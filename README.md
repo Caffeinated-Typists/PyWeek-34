@@ -2,7 +2,9 @@
 
 ## Introduction
 
-You are a space ranger sent to Planet 8134-F to scope the planet for suitable locations for your civilization to exist. However, you must survive against the harsh climate and the alien species living on the planet. Do you think you have what it takes to survive? 
+You are a space ranger sent to Planet 8134-F to scope the planet for suitable locations for your civilization to exist. Unfortunately, a group of interstellar ravagers have tracked you down and are plotting to steal your resources for themselves.
+
+Put an end to your adversaries as you find your way through the hostile lands of what's about to be your new home. The challenge will only get more difficult as time ticks.
 
 ## How to run the game locally?
 1. Clone the repository
