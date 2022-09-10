@@ -3,6 +3,7 @@ import arcade
 import arcade.gui
 import copy
 from time import time
+from math import log2, floor
 import os
 import sys
 
@@ -22,7 +23,11 @@ SCREEN_TITLE:str = "Project Aries"
 
 #Time constants
 START_TIME:time = None
- 
+
+#score constants
+TIME_MULTIPLIER:int = 4
+ENEMY_MULTIPLIER:int = 20
+
 #scaling constants
 TILE_SCALING:float = 0.5
 
@@ -185,6 +190,7 @@ class GameView(arcade.View):
         
         self.scene = arcade.Scene()
         self.manager = arcade.gui.UIManager()
+        self.score = 0
         GAME_SPEED = 5
 
         #adding the layers
@@ -246,7 +252,8 @@ class GameView(arcade.View):
         self.clear()
         arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
         self.scene.draw()
-        arcade.draw_text(f"TIME: {round(time() - START_TIME)}s", PLATFORM_HEIGHT/10, PLATFORM_WIDTH/2, arcade.csscolor.WHITE, 15)
+        if not self.protagonist.is_dead:
+            arcade.draw_text(f"SCORE: {round(self.score, 2)}", PLATFORM_HEIGHT/10, PLATFORM_WIDTH/2, arcade.csscolor.WHITE, 15)
         self.manager.draw()
         if self.protagonist.is_dead:
             self.end_text.draw()
@@ -254,6 +261,7 @@ class GameView(arcade.View):
     def on_update(self, delta_time: float):
         """Specify the computations at each refresh"""
         global GAME_SPEED
+        self.score+=delta_time*TIME_MULTIPLIER
         self.process_key_change()
         self.physics_engine.update()
 
@@ -270,6 +278,8 @@ class GameView(arcade.View):
         self.move_and_pop(LAYER_UFO, GAME_SPEED)
         self.move_and_pop(LAYER_DEATH, GAME_SPEED)
 
+        self.new_game_speed()
+
         #adding platforms 
         self.clear_extra_bullets()
 
@@ -285,7 +295,9 @@ class GameView(arcade.View):
         #checking for collisions with bullets
         for ufo in self.scene[LAYER_UFO]:
             hit_list = arcade.check_for_collision_with_list(ufo, self.scene[LAYER_BULLETS])
+
             if len(hit_list) > 0:
+                self.score += ENEMY_MULTIPLIER
                 if ufo.update_bullet_damage(BULLET_DAMAGE):
                     arcade.play_sound(self.ufo_hit, volume=0.2)
                     ufo.play_dead_animation(self.scene)
@@ -400,6 +412,17 @@ class GameView(arcade.View):
 
         elif (x > (2 * SCREEN_WIDTH//3) - 100 and x < (2 * SCREEN_WIDTH//3) + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
             arcade.close_window()
+
+    def new_game_speed(self):
+        """Updates the speed"""
+        global GAME_SPEED
+        GAME_SPEED = min(5 + int((time() - START_TIME) // 30), 14)
+        
+        if GAME_SPEED > 11:
+            self.protagonist.start_running()
+        
+        if self.protagonist.is_dead:
+            GAME_SPEED = 0
 
 def main()->None:
     """Main function for calling setup functions and running module"""

@@ -17,9 +17,9 @@ UFO_PROBABILITY:float = 0.8
 def hitpoint_randomizer(hitpoint:int) -> int:
     """Randomize the hitpoints of UFO between 1 and 2"""
     if random.random() <= UFO_PROBABILITY:
-        return hitpoint
-    else:
         return 2*hitpoint
+    else:
+        return 3*hitpoint
 
 class UFO(Enemy):
 
