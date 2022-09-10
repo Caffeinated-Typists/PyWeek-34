@@ -3,7 +3,7 @@ import arcade
 import arcade.gui
 import copy
 from time import time
-from math import log2, floor
+from math import log2, floor, sin
 import os
 import sys
 
@@ -15,7 +15,7 @@ from foliage.foliage import Foliage
 from env_objects.env_objects import EnvObject
 from characters.ufo import UFO
 from characters.crawler import Crawler
-
+from characters.spaceship import SpaceShip
 
 #screen constants
 SCREEN_WIDTH:int = 1000
@@ -51,6 +51,10 @@ CHARACTER_BOTTOM:int = PLATFORM_HEIGHT
 #Bullet Constants
 BULLET_DAMAGE:int = 100
 
+#SpaceShip Constants
+SPACESHIP_FREQ:int = 1
+SHOOT_FREQ:int = 3
+
 # Game resources
 # platforms 
 CORNER_PIECE_LEFT:str = r"resources/Game Assets/deserttileset/png/Tile/1.png"
@@ -76,9 +80,11 @@ LAYER_CLOUD:str = "Clouds"
 LAYER_FOLIAGE:str = "Foliage"
 LAYER_OBJECTS:str = "Objects"
 LAYER_BULLETS:str = "Bullets"
+LAYER_ENEMY_BULLETS:str = "Enemy_Bullets"
 LAYER_UFO:str = "UFO"
 LAYER_CRAWLER:str = "Crawlers"
 LAYER_DEATH:str = "Death"
+LAYER_SPACESHIP:str = "Spaceship"
 
 #set of objects to be used
 OBJECTS:dict[str:typing.Optional] = {
@@ -87,7 +93,8 @@ OBJECTS:dict[str:typing.Optional] = {
     LAYER_OBJECTS: EnvObject,
     LAYER_UFO: UFO,
     LAYER_CRAWLER: Crawler,
-    }
+    LAYER_SPACESHIP: SpaceShip,
+}
 
 def reset_dir()->bool:
     """Resets the current working directory to file path of this file"""
@@ -179,6 +186,9 @@ class GameView(arcade.View):
         self.score = 0
         self.last_update:time = None
 
+        self.spaceship_last_seen:time = None
+        self.spaceship_motion:time = None
+
         self.physics_engine:arcade.PhysicsEnginePlatformer = None
 
         self.restart_style:dict[str:typing.Optional] = {
@@ -213,7 +223,9 @@ class GameView(arcade.View):
         self.scene.add_sprite_list(LAYER_PROTAGONIST)
         self.scene.add_sprite_list(LAYER_UFO)
         self.scene.add_sprite_list(LAYER_CRAWLER)
+        self.scene.add_sprite_list(LAYER_SPACESHIP)
         self.scene.add_sprite_list(LAYER_BULLETS)
+        self.scene.add_sprite_list(LAYER_ENEMY_BULLETS)
 
         self.scene[LAYER_CLOUD].alpha = 100
         #playing audio
@@ -248,7 +260,7 @@ class GameView(arcade.View):
         self.init_sprites(LAYER_FOLIAGE, 0, SCREEN_WIDTH, 2)
         self.init_sprites(LAYER_OBJECTS, SCREEN_WIDTH, SCREEN_WIDTH * 2, 2)
         self.init_sprites(LAYER_UFO, SCREEN_WIDTH, SCREEN_WIDTH * 2, 2)
-        self.init_sprites(LAYER_CRAWLER, SCREEN_WIDTH, SCREEN_WIDTH * 2, 1)
+        # self.init_sprites(LAYER_CRAWLER, SCREEN_WIDTH, SCREEN_WIDTH * 2, 1)
 
         self.generate_ceiling()
 
@@ -257,6 +269,8 @@ class GameView(arcade.View):
         global START_TIME
         START_TIME = time()
         self.last_update = START_TIME
+        self.spaceship_last_seen = START_TIME
+        self.spaceship_motion = None
 
     def on_show_view(self)->None:
         """Display window on function call"""
@@ -284,7 +298,7 @@ class GameView(arcade.View):
         self.physics_engine.update()
 
         self.scene.update_animation(delta_time, [LAYER_PROTAGONIST, LAYER_DEATH, LAYER_UFO, LAYER_CRAWLER])
-        self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS, LAYER_UFO, LAYER_CRAWLER])
+        self.scene.update([LAYER_PROTAGONIST, LAYER_BULLETS, LAYER_CRAWLER, LAYER_ENEMY_BULLETS])
 
         self.protagonist.set_pos_x(CHARACTER_BOTTOM + self.protagonist.width // 2)
 
@@ -296,6 +310,23 @@ class GameView(arcade.View):
         self.move_and_pop(LAYER_UFO, GAME_SPEED)
         self.move_and_pop(LAYER_DEATH, GAME_SPEED)
         self.move_and_pop(LAYER_CRAWLER, int(GAME_SPEED * 1.33))
+        if (GAME_SPEED > 8) and (not self.protagonist.is_dead) and (len(self.scene[LAYER_SPACESHIP]) == 0) and ((time() - self.spaceship_last_seen) > SPACESHIP_FREQ):
+            temp_spaceship:SpaceShip = SpaceShip()
+            self.scene.add_sprite(LAYER_SPACESHIP, temp_spaceship)
+
+        if (len(self.scene[LAYER_SPACESHIP]) != 0):
+            if (time() - self.scene[LAYER_SPACESHIP][0].last_shot) > SHOOT_FREQ:
+                self.scene[LAYER_SPACESHIP][0].can_shoot = True
+            if self.scene[LAYER_SPACESHIP][0].can_shoot:
+                self.scene[LAYER_SPACESHIP][0].shoot(self.scene)
+
+            if self.spaceship_motion is None:
+                if self.scene[LAYER_SPACESHIP][0].center_y < (3*(SCREEN_HEIGHT//5)):
+                    self.spaceship_motion = time()
+                else:
+                    self.scene[LAYER_SPACESHIP][0].center_y -= 5
+            else:
+                self.scene[LAYER_SPACESHIP][0].center_y = int((3*(SCREEN_HEIGHT//5)) + (SCREEN_HEIGHT//5)*sin(time() - self.spaceship_motion))
 
         self.new_game_speed()
 
@@ -310,11 +341,12 @@ class GameView(arcade.View):
         self.add_layer_sprites(LAYER_FOLIAGE, 2, 1, SCREEN_WIDTH)
         self.add_layer_sprites(LAYER_OBJECTS, 2, 1, SCREEN_WIDTH * 2)
         self.add_layer_sprites(LAYER_UFO, 2, 1, SCREEN_WIDTH)
-        self.add_layer_sprites(LAYER_CRAWLER, 1, 1, SCREEN_WIDTH)
+        if GAME_SPEED > 7:
+            self.add_layer_sprites(LAYER_CRAWLER, 1, 1, SCREEN_WIDTH)
 
         #checking for collisions with bullets
         for ufo in self.scene[LAYER_UFO]:
-            hit_list = arcade.check_for_collision_with_list(ufo, self.scene[LAYER_BULLETS])
+            hit_list:list[arcade.Sprite] = arcade.check_for_collision_with_list(ufo, self.scene[LAYER_BULLETS])
 
             if len(hit_list) > 0:
                 self.score += ENEMY_MULTIPLIER
@@ -325,8 +357,22 @@ class GameView(arcade.View):
             for bullet in hit_list:
                 bullet.remove_from_sprite_lists()
 
+        for spaceship in self.scene[LAYER_SPACESHIP]:
+            hit_list:list[arcade.Sprite] = arcade.check_for_collision_with_list(spaceship, self.scene[LAYER_BULLETS])
+
+            if len(hit_list) > 0:
+                self.score += 3*ENEMY_MULTIPLIER
+                if ufo.update_bullet_damage(BULLET_DAMAGE):
+                    arcade.play_sound(self.ufo_hit, volume=0.2)
+                    spaceship.play_dead_animation(self.scene)
+                    spaceship.remove_from_sprite_lists()
+                    self.spaceship_last_seen = time()
+                    self.spaceship_motion = None
+            for bullet in hit_list:
+                bullet.remove_from_sprite_lists()
+
         #checking for collision with env objects
-        self.hit_list:list = arcade.check_for_collision_with_lists(self.protagonist, [self.scene[LAYER_OBJECTS], self.scene[LAYER_UFO], self.scene[LAYER_BULLETS], self.scene[LAYER_CRAWLER]])
+        self.hit_list:list = arcade.check_for_collision_with_lists(self.protagonist, [self.scene[LAYER_OBJECTS], self.scene[LAYER_UFO], self.scene[LAYER_ENEMY_BULLETS], self.scene[LAYER_CRAWLER]])
         if len(self.hit_list) > 0:
             arcade.stop_sound(self.bg_player)
             arcade.play_sound(self.end_game)
@@ -340,7 +386,9 @@ class GameView(arcade.View):
             self.scene[LAYER_OBJECTS].clear()
             self.scene[LAYER_UFO].clear()
             self.scene[LAYER_CRAWLER].clear()
+            self.scene[LAYER_SPACESHIP].clear()
             self.scene[LAYER_CEILING].clear()
+            self.scene[LAYER_ENEMY_BULLETS].clear()
 
             restart:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Restart", x=SCREEN_WIDTH//3- 100, y=SCREEN_HEIGHT//4 - 50, width=200, height=100, style=self.restart_style)
             exit_game:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Main Menu", x= (2 * SCREEN_WIDTH//3) - 100, y=SCREEN_HEIGHT//4 - 50, width=200, height=100, style=self.end_style)
@@ -348,8 +396,6 @@ class GameView(arcade.View):
             self.manager.add(exit_game)
             self.end_text:arcade.Text = arcade.Text("GAME OVER", SCREEN_WIDTH//2, 2 * SCREEN_HEIGHT//3, arcade.color.WHITE, 65, width=100, font_name="consolas", align="left", anchor_x="center", anchor_y="center")
             self.score_text:arcade.Text = arcade.Text(f"SCORE: {round(self.score)}", SCREEN_WIDTH//2, SCREEN_HEIGHT//2, arcade.color.WHITE, 30, width=150, font_name="consolas", align="left", anchor_x="center")
-
-            # self.window.show_view(MainMenu())
 
     def generate_platform(self, start:int):
         """Generates the platform"""
@@ -429,7 +475,11 @@ class GameView(arcade.View):
         """Remove bullets which have left the screen out of Sprite list"""
 
         for bullet in self.scene[LAYER_BULLETS]:
-            if bullet.left > SCREEN_WIDTH:
+            if (bullet.left > SCREEN_WIDTH) or (bullet.right < 0):
+                bullet.remove_from_sprite_lists()
+
+        for bullet in self.scene[LAYER_ENEMY_BULLETS]:
+            if (bullet.left > SCREEN_WIDTH) or (bullet.right < 0):
                 bullet.remove_from_sprite_lists()
     
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
