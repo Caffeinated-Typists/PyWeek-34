@@ -60,6 +60,7 @@ CORNER_PIECE_RIGHT:str = r"resources/Game Assets/deserttileset/png/Tile/3.png"
 FONT:str = r"resources/Game Assets/GROBOLD.ttf"
 #background music
 BACKGROUND_MUSIC:str = r"resources/Game Assets/Sounds/background-loop-melodic-techno.mp3"
+BACKGROUND_MUSIC_MAIN:str = r"resources\Game Assets\Sounds\tense-detective-looped-drone.mp3"
 END_SOUND:str = r"resources/Game Assets/Sounds/boxopen.ogg"
 UFO_HIT_SOUND = r"characters/UFO Sprites/Bullet Impact 21.wav"
 
@@ -103,12 +104,15 @@ class MainMenu(arcade.View):
         self.background:arcade.Texture = None
         arcade.load_font(FONT)
         self.setup()
+        self.clicked = False
 
     
     def setup(self) -> None:
         self.background = arcade.load_texture(BACKGROUND)
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
+        self.bg_music = arcade.load_sound(BACKGROUND_MUSIC_MAIN)
+        self.player = arcade.play_sound(self.bg_music, looping=True)
 
         start_style:dict[str:typing.Optional] = {
             "font_color": arcade.color.UFO_GREEN,
@@ -145,12 +149,14 @@ class MainMenu(arcade.View):
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         """Does different things depending on which button is pressed"""
-        if (x > SCREEN_WIDTH//3 - 100 and x < SCREEN_WIDTH//3 + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
-            game_view:GameView = GameView()
-            self.window.show_view(game_view)
+        if not self.clicked:
+            if (x > SCREEN_WIDTH//3 - 100 and x < SCREEN_WIDTH//3 + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
+                self.player.pause()
+                game_view:GameView = GameView()
+                self.window.show_view(game_view)
 
-        elif (x > (2 * SCREEN_WIDTH//3) - 100 and x < (2 * SCREEN_WIDTH//3) + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
-            arcade.close_window()
+            elif (x > (2 * SCREEN_WIDTH//3) - 100 and x < (2 * SCREEN_WIDTH//3) + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
+                arcade.close_window()
 
 class GameView(arcade.View):
     """Class for the handling all the game related functionality"""
@@ -167,7 +173,7 @@ class GameView(arcade.View):
         self.space_pressed:bool = False
         self.shoot_pressed:bool = False
         self.can_shoot:bool = True
-
+        self.bg_player = None
         self.protagonist:arcade.Sprite = None
 
         self.score = 0
@@ -177,7 +183,7 @@ class GameView(arcade.View):
 
         self.restart_style:dict[str:typing.Optional] = {
             "font_color": arcade.color.YELLOW,
-            "font_size": 40,
+            "font_size": 30,
             "font_name": "GROBOLD",
             "bg_color": (15, 15, 15, 100),
 
@@ -211,6 +217,8 @@ class GameView(arcade.View):
 
         self.scene[LAYER_CLOUD].alpha = 100
         #playing audio
+        if self.bg_player:
+            self.bg_player.pause()
         self.bg_player = arcade.play_sound(arcade.load_sound(BACKGROUND_MUSIC), looping=True)
         self.end_game = arcade.load_sound(END_SOUND)
         self.ufo_hit = arcade.load_sound(UFO_HIT_SOUND)
@@ -335,7 +343,7 @@ class GameView(arcade.View):
             self.scene[LAYER_CEILING].clear()
 
             restart:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Restart", x=SCREEN_WIDTH//3- 100, y=SCREEN_HEIGHT//4 - 50, width=200, height=100, style=self.restart_style)
-            exit_game:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Exit", x= (2 * SCREEN_WIDTH//3) - 100, y=SCREEN_HEIGHT//4 - 50, width=200, height=100, style=self.end_style)
+            exit_game:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Main Menu", x= (2 * SCREEN_WIDTH//3) - 100, y=SCREEN_HEIGHT//4 - 50, width=200, height=100, style=self.end_style)
             self.manager.add(restart)
             self.manager.add(exit_game)
             self.end_text:arcade.Text = arcade.Text("GAME OVER", SCREEN_WIDTH//2, 2 * SCREEN_HEIGHT//3, arcade.color.WHITE, 65, width=100, font_name="consolas", align="left", anchor_x="center", anchor_y="center")
@@ -375,6 +383,10 @@ class GameView(arcade.View):
         """Adds new items(with start_position) to the specified layer, if number of objects is less than threshold"""
         if len(self.scene[layer]) < threshold:
             for i in range(no_of_objects):
+                if len(self.scene[layer]) == 0:
+                    last_position:int = start_position
+                else:
+                    last_position:int = int(self.scene[layer][-1].right)
                 temp_sprite:arcade.Sprite = OBJECTS[layer](position=start_position)
                 self.scene.add_sprite(layer, temp_sprite)
 
@@ -426,7 +438,9 @@ class GameView(arcade.View):
             self.setup()
 
         elif (x > (2 * SCREEN_WIDTH//3) - 100 and x < (2 * SCREEN_WIDTH//3) + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
-            arcade.close_window()
+            main_view:MainMenu = MainMenu()
+            self.window.show_view(main_view)
+
 
     def new_game_speed(self):
         """Updates the speed"""
