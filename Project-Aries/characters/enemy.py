@@ -13,6 +13,7 @@ class Enemy(arcade.Sprite):
         super().__init__(scale = scale)
         self.hitpoints:int = hitpoints
         self.cur_texture:int = 0
+        self.death_texture:arcade.Texture = None
         
     def set_pos_x(self, x:int) -> None:
         """Set x-position of Sprite"""
@@ -52,10 +53,12 @@ class Enemy(arcade.Sprite):
         """Update the hitpoints of Sprite after being hit by a bullet, returns True if the enemy dies"""
         self.hitpoints = min(self.hitpoints - damage, 0)
         if self.hitpoints == 0:
-            #Implement a function to play death animation
             return True
         else:
             return False
+    
+    def play_dead_animation(self, scene:arcade.scene) -> None:
+        """Add a Sprite to play the death animation to scene"""
 
     def update_animation(self, delta_time: float):
         """Update the animations upon death"""
