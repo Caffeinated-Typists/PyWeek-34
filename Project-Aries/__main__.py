@@ -112,7 +112,7 @@ class MainMenu(arcade.View):
         }
         
         end_style:dict[str:typing.Optional] = copy.deepcopy(start_style)
-        end_style["font_color"] = arcade.color.OUTRAGEOUS_ORANGE
+        end_style["font_color"] = arcade.color.CORAL_RED
         
 
         start:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Start", x=SCREEN_WIDTH//3- 100, y=SCREEN_HEIGHT//4 - 50, width=200, height=100, style=start_style)
@@ -136,7 +136,7 @@ class MainMenu(arcade.View):
 
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
-        """When mouse is clicked, start game"""
+        """Does different things depending on which button is pressed"""
         if (x > SCREEN_WIDTH//3 - 100 and x < SCREEN_WIDTH//3 + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
             game_view:GameView = GameView()
             self.window.show_view(game_view)
@@ -155,7 +155,7 @@ class GameView(arcade.View):
 
         self.scene:arcade.Scene = None
         self.background:arcade.Texture = None
-
+        self.manager:arcade.gui.UIManager = None
         self.space_pressed:bool = False
         self.shoot_pressed:bool = False
         self.can_shoot:bool = True
@@ -166,11 +166,26 @@ class GameView(arcade.View):
 
         self.physics_engine:arcade.PhysicsEnginePlatformer = None
 
+        self.restart_style:dict[str:typing.Optional] = {
+            "font_color": arcade.color.YELLOW,
+            "font_size": 40,
+            "font_name": "GROBOLD",
+            "bg_color": (15, 15, 15, 100),
+
+            "bg_color_hover": (30, 30, 30, 100),
+        }
+
+        self.end_style:dict[str:typing.Optional] = copy.deepcopy(self.restart_style)
+        self.end_style["font_color"] = arcade.color.CORAL_RED
+
     def setup(self)->None:
         """Setup all the variables and maps here"""
+        global GAME_SPEED
         self.background = arcade.load_texture(BACKGROUND)
         
         self.scene = arcade.Scene()
+        self.manager = arcade.gui.UIManager()
+        GAME_SPEED = 5
 
         #adding the layers
         self.scene.add_sprite_list(LAYER_PLATFORM)
@@ -189,6 +204,7 @@ class GameView(arcade.View):
         self.end_game = arcade.load_sound(END_SOUND)
         self.ufo_hit = arcade.load_sound(UFO_HIT_SOUND)
 
+        #removing death layer(if present)
 
         #creating the protagonist
         self.protagonist = Protagonist()
@@ -231,6 +247,9 @@ class GameView(arcade.View):
         arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
         self.scene.draw()
         arcade.draw_text(f"TIME: {round(time() - START_TIME)}s", PLATFORM_HEIGHT/10, PLATFORM_WIDTH/2, arcade.csscolor.WHITE, 15)
+        self.manager.draw()
+        if self.protagonist.is_dead:
+            self.end_text.draw()
 
     def on_update(self, delta_time: float):
         """Specify the computations at each refresh"""
@@ -288,6 +307,13 @@ class GameView(arcade.View):
             self.scene[LAYER_OBJECTS].clear()
             self.scene[LAYER_UFO].clear()
             self.scene[LAYER_CEILING].clear()
+
+            restart:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Restart", x=SCREEN_WIDTH//3- 100, y=SCREEN_HEIGHT//4 - 50, width=200, height=100, style=self.restart_style)
+            exit_game:arcade.gui.UIFlatButton = arcade.gui.UIFlatButton(text="Exit", x= (2 * SCREEN_WIDTH//3) - 100, y=SCREEN_HEIGHT//4 - 50, width=200, height=100, style=self.end_style)
+            self.manager.add(restart)
+            self.manager.add(exit_game)
+            self.end_text:arcade.Text = arcade.Text("GAME OVER", SCREEN_WIDTH//2, 2 * SCREEN_HEIGHT//3, arcade.color.WHITE, 65, width=100, font_name="consolas", align="left", anchor_x="center", anchor_y="center")
+
             # self.window.show_view(MainMenu())
 
     def generate_platform(self, start:int):
@@ -366,6 +392,14 @@ class GameView(arcade.View):
         for bullet in self.scene[LAYER_BULLETS]:
             if bullet.left > SCREEN_WIDTH:
                 bullet.remove_from_sprite_lists()
+    
+    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
+        """Restart and exit game"""
+        if (x > SCREEN_WIDTH//3 - 100 and x < SCREEN_WIDTH//3 + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
+            self.setup()
+
+        elif (x > (2 * SCREEN_WIDTH//3) - 100 and x < (2 * SCREEN_WIDTH//3) + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
+            arcade.close_window()
 
 def main()->None:
     """Main function for calling setup functions and running module"""
