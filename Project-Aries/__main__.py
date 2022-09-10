@@ -104,6 +104,7 @@ class MainMenu(arcade.View):
         self.background:arcade.Texture = None
         arcade.load_font(FONT)
         self.setup()
+        self.clicked = False
 
     
     def setup(self) -> None:
@@ -148,13 +149,14 @@ class MainMenu(arcade.View):
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         """Does different things depending on which button is pressed"""
-        if (x > SCREEN_WIDTH//3 - 100 and x < SCREEN_WIDTH//3 + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
-            self.player.pause()
-            game_view:GameView = GameView()
-            self.window.show_view(game_view)
+        if not self.clicked:
+            if (x > SCREEN_WIDTH//3 - 100 and x < SCREEN_WIDTH//3 + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
+                self.player.pause()
+                game_view:GameView = GameView()
+                self.window.show_view(game_view)
 
-        elif (x > (2 * SCREEN_WIDTH//3) - 100 and x < (2 * SCREEN_WIDTH//3) + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
-            arcade.close_window()
+            elif (x > (2 * SCREEN_WIDTH//3) - 100 and x < (2 * SCREEN_WIDTH//3) + 100) and (y > SCREEN_HEIGHT//4 - 50 and y < SCREEN_HEIGHT//4 + 50):
+                arcade.close_window()
 
 class GameView(arcade.View):
     """Class for the handling all the game related functionality"""
@@ -171,7 +173,7 @@ class GameView(arcade.View):
         self.space_pressed:bool = False
         self.shoot_pressed:bool = False
         self.can_shoot:bool = True
-
+        self.bg_player = None
         self.protagonist:arcade.Sprite = None
 
         self.score = 0
@@ -215,6 +217,8 @@ class GameView(arcade.View):
 
         self.scene[LAYER_CLOUD].alpha = 100
         #playing audio
+        if self.bg_player:
+            self.bg_player.pause()
         self.bg_player = arcade.play_sound(arcade.load_sound(BACKGROUND_MUSIC), looping=True)
         self.end_game = arcade.load_sound(END_SOUND)
         self.ufo_hit = arcade.load_sound(UFO_HIT_SOUND)
