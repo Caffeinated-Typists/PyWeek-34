@@ -3,7 +3,7 @@ import arcade
 import arcade.gui
 import copy
 from time import time
-from math import log2, floor
+from math import log2, floor, sin
 import os
 import sys
 
@@ -181,6 +181,7 @@ class GameView(arcade.View):
         self.last_update:time = None
 
         self.spaceship_last_seen:time = None
+        self.spaceship_motion:time = None
 
         self.physics_engine:arcade.PhysicsEnginePlatformer = None
 
@@ -251,7 +252,7 @@ class GameView(arcade.View):
         self.init_sprites(LAYER_FOLIAGE, 0, SCREEN_WIDTH, 2)
         self.init_sprites(LAYER_OBJECTS, SCREEN_WIDTH, SCREEN_WIDTH * 2, 2)
         self.init_sprites(LAYER_UFO, SCREEN_WIDTH, SCREEN_WIDTH * 2, 2)
-        self.init_sprites(LAYER_CRAWLER, SCREEN_WIDTH, SCREEN_WIDTH * 2, 1)
+        # self.init_sprites(LAYER_CRAWLER, SCREEN_WIDTH, SCREEN_WIDTH * 2, 1)
 
         self.generate_ceiling()
 
@@ -261,6 +262,7 @@ class GameView(arcade.View):
         START_TIME = time()
         self.last_update = START_TIME
         self.spaceship_last_seen = START_TIME
+        self.spaceship_motion = None
 
     def on_show_view(self)->None:
         """Display window on function call"""
@@ -300,7 +302,7 @@ class GameView(arcade.View):
         self.move_and_pop(LAYER_UFO, GAME_SPEED)
         self.move_and_pop(LAYER_DEATH, GAME_SPEED)
         self.move_and_pop(LAYER_CRAWLER, int(GAME_SPEED * 1.33))
-        if (not self.protagonist.is_dead) and (len(self.scene[LAYER_SPACESHIP]) == 0) and ((time() - self.spaceship_last_seen) > SPACESHIP_FREQ):
+        if (GAME_SPEED > 8) and (not self.protagonist.is_dead) and (len(self.scene[LAYER_SPACESHIP]) == 0) and ((time() - self.spaceship_last_seen) > SPACESHIP_FREQ):
             temp_spaceship:SpaceShip = SpaceShip()
             self.scene.add_sprite(LAYER_SPACESHIP, temp_spaceship)
 
@@ -310,11 +312,13 @@ class GameView(arcade.View):
             if self.scene[LAYER_SPACESHIP][0].can_shoot:
                 self.scene[LAYER_SPACESHIP][0].shoot(self.scene)
 
-            if self.scene[LAYER_SPACESHIP][0].center_y < (SCREEN_HEIGHT//2):
-                pass
+            if self.spaceship_motion is None:
+                if self.scene[LAYER_SPACESHIP][0].center_y < (3*(SCREEN_HEIGHT//5)):
+                    self.spaceship_motion = time()
+                else:
+                    self.scene[LAYER_SPACESHIP][0].center_y -= 5
             else:
-                self.scene[LAYER_SPACESHIP][0].center_y -= 5
-            # print(self.scene[LAYER_SPACESHIP][0].center_x, self.scene[LAYER_SPACESHIP][0].center_y)
+                self.scene[LAYER_SPACESHIP][0].center_y = int((3*(SCREEN_HEIGHT//5)) + (SCREEN_HEIGHT//5)*sin(time() - self.spaceship_motion))
 
         self.new_game_speed()
 
@@ -329,7 +333,8 @@ class GameView(arcade.View):
         self.add_layer_sprites(LAYER_FOLIAGE, 2, 1, SCREEN_WIDTH)
         self.add_layer_sprites(LAYER_OBJECTS, 2, 1, SCREEN_WIDTH * 2)
         self.add_layer_sprites(LAYER_UFO, 2, 1, SCREEN_WIDTH)
-        self.add_layer_sprites(LAYER_CRAWLER, 1, 1, SCREEN_WIDTH)
+        if GAME_SPEED > 7:
+            self.add_layer_sprites(LAYER_CRAWLER, 1, 1, SCREEN_WIDTH)
 
         #checking for collisions with bullets
         for ufo in self.scene[LAYER_UFO]:
@@ -354,6 +359,7 @@ class GameView(arcade.View):
                     spaceship.play_dead_animation(self.scene)
                     spaceship.remove_from_sprite_lists()
                     self.spaceship_last_seen = time()
+                    self.spaceship_motion = None
             for bullet in hit_list:
                 bullet.remove_from_sprite_lists()
 
@@ -457,6 +463,10 @@ class GameView(arcade.View):
         """Remove bullets which have left the screen out of Sprite list"""
 
         for bullet in self.scene[LAYER_BULLETS]:
+            if (bullet.left > SCREEN_WIDTH) or (bullet.right < 0):
+                bullet.remove_from_sprite_lists()
+
+        for bullet in self.scene[LAYER_ENEMY_BULLETS]:
             if (bullet.left > SCREEN_WIDTH) or (bullet.right < 0):
                 bullet.remove_from_sprite_lists()
     

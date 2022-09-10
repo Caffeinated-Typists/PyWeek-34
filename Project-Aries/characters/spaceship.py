@@ -40,7 +40,6 @@ class SpaceShip(Enemy):
 
     def shoot(self, scene:arcade.scene) -> None:
         """Shoot a bullet from the spaceship"""
-        print("CALLED")
         bullet:arcade.Sprite = arcade.Sprite("characters\Spaceship\laser.png", BULLET_SCALE)
         bullet.center_x = self.center_x - BULLET_MARGIN_X
         bullet.center_y = self.center_y - BULLET_MARGIN_Y
@@ -48,4 +47,3 @@ class SpaceShip(Enemy):
         scene.add_sprite(LAYER_ENEMY_BULLETS, bullet)
         self.last_shot = time()
         self.can_shoot = False
-        # arcade.play_sound(self.pew, volume=0.3)
